@@ -17,8 +17,6 @@
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
 <script>
-// FIX: Rimossa la funzione obsoleta removeItem(tipo, index) che causava bug di eliminazione errata.
-
 let ACTIVE_MARKER = null;
 
 function clearSelectedCards(){
@@ -293,7 +291,6 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);c
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── MODALS AGGIUNTA / PASSAPORTO / SETTINGS ── */
-/* FIX: Alzato lo z-index da 2000 a 10000 per evitare sovrapposizioni con la chat AI */
 .modal-overlay{
   display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;
   align-items:center;justify-content:center;
@@ -442,8 +439,8 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);c
       <button class="tab" onclick="switchTab('eventi')" aria-label="Vai a sezione Eventi"><span class="tab-emoji">📅</span>Eventi</button>
       <button class="tab" onclick="switchTab('itinerari')" aria-label="Vai a sezione Itinerari"><span class="tab-emoji">🗺</span>Itinerari</button>
     </div>
+    
     <div id="sidebar-content">
-
       <div class="panel active" id="panel-luoghi">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <input class="search-box" id="search-luoghi" placeholder="🔍 Cerca borgo, rifugio, castello…" oninput="filterLuoghi()" style="flex:1;margin-right:8px"/>
@@ -451,16 +448,14 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);c
         </div>
         <div class="filter-row" id="filter-luoghi"></div>
         
-<div style="background:linear-gradient(135deg,#355c3a,#6c8c4a);color:#fff;
-border-radius:14px;padding:14px 16px;margin-bottom:14px;
-box-shadow:0 4px 14px rgba(0,0,0,.15)">
-  <div style="font-size:20px;font-weight:700;margin-bottom:6px">🏔 Parco delle Madonie</div>
-  <div style="font-size:13px;line-height:1.5;opacity:.95">
-    Borghi storici, sentieri naturalistici, castelli medievali, cucina siciliana autentica e paesaggi montani unici.
-  </div>
-</div>
+        <div style="background:linear-gradient(135deg,#355c3a,#6c8c4a);color:#fff; border-radius:14px;padding:14px 16px;margin-bottom:14px; box-shadow:0 4px 14px rgba(0,0,0,.15)">
+          <div style="font-size:20px;font-weight:700;margin-bottom:6px">🏔 Parco delle Madonie</div>
+          <div style="font-size:13px;line-height:1.5;opacity:.95">
+            Borghi storici, sentieri naturalistici, castelli medievali, cucina siciliana autentica e paesaggi montani unici.
+          </div>
+        </div>
 
-<div class="section-title" style="margin-top:12px">Luoghi turistici delle Madonie</div>
+        <div class="section-title" style="margin-top:12px">Luoghi turistici delle Madonie</div>
         <div class="count-label" id="count-luoghi"></div>
         <div id="montagna-banner" style="display:none;flex-direction:column;gap:8px;margin-bottom:10px">
           <div style="display:flex;gap:8px">
@@ -573,21 +568,20 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
         <div class="rest-filter-group" style="margin-top:4px">
           <label style="font-size:12px;font-weight:600;color:var(--stone);display:block;margin-bottom:5px">Città</label>
           <select id="filter-rest-city" onchange="filterRest()" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;background:#fff;color:var(--text);cursor:pointer">
-            
-<option value="tutte">📍 Tutte le città</option>
-<option value="Alimena">Alimena</option>
-<option value="Caccamo">Caccamo</option>
-<option value="Castelbuono">Castelbuono</option>
-<option value="Castellana Sicula">Castellana Sicula</option>
-<option value="Cefalù">Cefalù</option>
-<option value="Collesano">Collesano</option>
-<option value="Gangi">Gangi</option>
-<option value="Geraci Siculo">Geraci Siculo</option>
-<option value="Petralia Soprana">Petralia Soprana</option>
-<option value="Petralia Sottana">Petralia Sottana</option>
-<option value="Polizzi Generosa">Polizzi Generosa</option>
-<option value="Scillato">Scillato</option>
-</select>
+            <option value="tutte">📍 Tutte le città</option>
+            <option value="Alimena">Alimena</option>
+            <option value="Caccamo">Caccamo</option>
+            <option value="Castelbuono">Castelbuono</option>
+            <option value="Castellana Sicula">Castellana Sicula</option>
+            <option value="Cefalù">Cefalù</option>
+            <option value="Collesano">Collesano</option>
+            <option value="Gangi">Gangi</option>
+            <option value="Geraci Siculo">Geraci Siculo</option>
+            <option value="Petralia Soprana">Petralia Soprana</option>
+            <option value="Petralia Sottana">Petralia Sottana</option>
+            <option value="Polizzi Generosa">Polizzi Generosa</option>
+            <option value="Scillato">Scillato</option>
+          </select>
         </div>
 
         <div class="rest-filter-group">
@@ -633,21 +627,20 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
         <div class="rest-filter-group" style="margin-top:4px">
           <label style="font-size:12px;font-weight:600;color:var(--stone);display:block;margin-bottom:5px">Città</label>
           <select id="filter-alloggi-city" onchange="filterAlloggi()" style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;background:#fff;color:var(--text);cursor:pointer">
-            
-<option value="tutte">📍 Tutte le città</option>
-<option value="Alimena">Alimena</option>
-<option value="Caccamo">Caccamo</option>
-<option value="Castelbuono">Castelbuono</option>
-<option value="Castellana Sicula">Castellana Sicula</option>
-<option value="Cefalù">Cefalù</option>
-<option value="Collesano">Collesano</option>
-<option value="Gangi">Gangi</option>
-<option value="Geraci Siculo">Geraci Siculo</option>
-<option value="Petralia Soprana">Petralia Soprana</option>
-<option value="Petralia Sottana">Petralia Sottana</option>
-<option value="Polizzi Generosa">Polizzi Generosa</option>
-<option value="Scillato">Scillato</option>
-</select>
+            <option value="tutte">📍 Tutte le città</option>
+            <option value="Alimena">Alimena</option>
+            <option value="Caccamo">Caccamo</option>
+            <option value="Castelbuono">Castelbuono</option>
+            <option value="Castellana Sicula">Castellana Sicula</option>
+            <option value="Cefalù">Cefalù</option>
+            <option value="Collesano">Collesano</option>
+            <option value="Gangi">Gangi</option>
+            <option value="Geraci Siculo">Geraci Siculo</option>
+            <option value="Petralia Soprana">Petralia Soprana</option>
+            <option value="Petralia Sottana">Petralia Sottana</option>
+            <option value="Polizzi Generosa">Polizzi Generosa</option>
+            <option value="Scillato">Scillato</option>
+          </select>
         </div>
 
         <div class="filter-row" id="filter-alloggi-tipo" style="margin-bottom:12px">
@@ -816,7 +809,10 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
         </div>
       </div>
 
-    </div></div><div id="map">
+    </div>
+  </div>
+  
+  <div id="map">
     <div id="map-container"></div>
   </div>
 </div>
@@ -862,6 +858,7 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
   <button id="chat-btn" aria-label="Apri assistente virtuale AI" onclick="toggleChat()">🤖</button>
 </div>
 
+<!-- Forms & Modals... -->
 <div class="modal-overlay" id="ristorante-modal">
   <div class="modal-box">
     <h2>🍽 Aggiungi ristorante</h2>
@@ -1156,7 +1153,7 @@ function openAlloggioModal() {
   document.getElementById('alloggio-modal').classList.add('open');
 }
 
-// NUOVE FUNZIONI IMPOSTAZIONI E RESET
+// IMPOSTAZIONI E RESET (AGGIORNATO SENZA ALERT/CONFIRM PER POLICY)
 function apriImpostazioni() {
   document.getElementById('settings-modal').classList.add('open');
 }
@@ -1168,15 +1165,31 @@ function rimuoviApiKey() {
 }
 
 function cancellaTuttiIDati() {
-  if(confirm("ATTENZIONE! Sei sicuro di voler eliminare tutti i tuoi dati, check-in e itinerari? L'operazione è irreversibile.")) {
-    Object.keys(localStorage).forEach(key => {
-      if (key.startsWith('madonie_')) {
-        localStorage.removeItem(key);
-      }
-    });
-    alert("Dati resettati con successo. L'app verrà ricaricata.");
-    location.reload();
-  }
+   closeModal('settings-modal');
+   const conf = document.createElement('div');
+   conf.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:10000;display:flex;align-items:center;justify-content:center;';
+   conf.innerHTML = `
+      <div style="background:#fff;padding:24px;border-radius:16px;width:90%;max-width:380px;text-align:center;">
+        <h3 style="color:#c62828;margin-bottom:8px">⚠️ ATTENZIONE!</h3>
+        <p style="font-size:13px;margin-bottom:16px">Sei sicuro di voler eliminare tutti i tuoi dati, check-in e itinerari? L'operazione è irreversibile.</p>
+        <div style="display:flex;gap:8px">
+          <button id="btn-no" style="flex:1;padding:10px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer">Annulla</button>
+          <button id="btn-yes" style="flex:1;padding:10px;border-radius:8px;background:#c62828;color:#fff;border:none;cursor:pointer">Elimina Tutto</button>
+        </div>
+      </div>
+   `;
+   document.body.appendChild(conf);
+   document.getElementById('btn-no').onclick = () => document.body.removeChild(conf);
+   document.getElementById('btn-yes').onclick = () => {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('madonie_')) {
+          localStorage.removeItem(key);
+        }
+      });
+      document.body.removeChild(conf);
+      showToast("Dati resettati con successo. Ricaricamento...");
+      setTimeout(() => location.reload(), 2000);
+   };
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1197,7 +1210,6 @@ const LUOGHI = [
 {name:"Castello dei Ventimiglia",cat:"cultura",coords:[37.9322,14.0888],desc:"Castello simbolo di Castelbuono.",pop:true}
 ];
 
-// FIX: Ripuliti interamente i sentieri per rimuovere le contaminazioni del Gargano
 const SENTIERI = [
 {name:"Sentiero Agrifogli Giganti di Piano Pomo",diff:"F",km:4,h:"2h",start:"Piano Sempria",coords:[[37.8931,14.0722],[37.8850,14.0800]],url:"https://it.wikiloc.com",desc:"Passeggiata magica tra alberi monumentali unici al mondo."},
 {name:"Sentiero Geologico Rocca di Sciara",diff:"M",km:6,h:"3h",start:"Polizzi Generosa",coords:[[37.8117,14.0034],[37.8200,14.0100]],url:"https://www.madonie.it",desc:"Percorso geologico con vista spettacolare sulle valli."},
@@ -1234,7 +1246,6 @@ const ALLOGGI_DEFAULT = [
 {name:"Hotel Ypsigro Palace",coords:[37.9318,14.0895],tipo:"hotel",prezzo:140,stelle:4,voto:"8.9 ⭐",loc:"Castelbuono",url:"https://www.ypsigropalace.it",desc:"Hotel nel centro storico."}
 ];
 
-// FIX: Ripuliti gli itinerari da contaminazioni estranee
 const ITINERARI_PREDEFINITI = [
 {name:"Castelbuono e i sapori antichi",tema:"storico",giorni:1,desc:"La cittadina simbolo delle Madonie: centro storico medievale, il Castello dei Ventimiglia e la degustazione di Manna.",tappe:["Castelbuono","Castello dei Ventimiglia","Fiasconaro Bistrot","Agriturismo Bergi"],km:5,coords:[[37.9315,14.0894],[37.9322,14.0888],[37.9312,14.0885],[37.9250,14.0800]]},
 {name:"Tra Borghi e Natura",tema:"natura",giorni:2,desc:"Due giorni nel cuore verde delle Madonie: foreste secolari, fauna e borghi antichi.",tappe:["Petralia Sottana","Piano Battaglia","Polizzi Generosa","Petralia Soprana"],km:45,coords:[[37.8080,14.0920],[37.8728,14.0165],[37.8117,14.0034],[37.8097,14.1084]]},
@@ -1569,7 +1580,7 @@ async function fetchMeteo(lat, lon, el) {
     const d = await r.json();
     const c = d.current;
     const desc = WMO[c.weathercode] || '🌡 Meteo';
-    el.innerHTML = `${desc}  ·  <b>${Math.round(c.temperature_2m)}°C</b>  ·  💨 ${Math.round(c.windspeed_10m)} km/h`;
+    el.innerHTML = `${desc}  ·  <b>${Math.round(c.temperature_2m)}°C</b>  ·  💨 ${Math.round(c.windspeed_10m)} km/h`;
   } catch(e) { el.innerHTML = ''; }
 }
 
@@ -2265,6 +2276,7 @@ function askForApiKeyModal() {
   });
 }
 
+// Aggiornato per usare gemini-3-flash-preview per l'uso delle funzionalità avanzate
 async function fetchGeminiWithRetry(payload, isJson = false, isVision = false) {
   let activeKey = localStorage.getItem('madonie_gemini_key') || apiKey;
   if (isJson) {
@@ -2279,7 +2291,7 @@ async function fetchGeminiWithRetry(payload, isJson = false, isVision = false) {
     };
   }
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${activeKey}`;
   const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
 
   if (!response.ok) {
@@ -2303,6 +2315,7 @@ function getAppDati() {
   return `LUOGHI: ${LUOGHI.map(l=>l.name).join(', ')}.\nRISTORANTI: ${RISTORANTI.map(r=>r.name).join(', ')}.\nSENTIERI: ${SENTIERI.map(s=>s.name).join(', ')}.`;
 }
 
+// INVIA MESSAGGIO AI - AGGIORNATO CON RICERCA WEB
 async function inviaMessaggioAI() {
   const input = document.getElementById('chat-input');
   const txt = input.value.trim(); if (!txt) return;
@@ -2314,7 +2327,8 @@ async function inviaMessaggioAI() {
 
   const payload = {
     contents: [{ parts: [{ text: txt }] }],
-    systemInstruction: { parts: [{ text: `Sei una guida turistica esperta del Madonie. Suggerisci luoghi basandoti ESCLUSIVAMENTE sui seguenti dati dell'app: ${getAppDati()}` }] }
+    systemInstruction: { parts: [{ text: `Sei una guida turistica esperta del Madonie. Usa i dati base dell'app come punto di partenza: ${getAppDati()}. Sei autorizzato a cercare all'esterno e usare le tue conoscenze web per integrare le risposte con informazioni aggiuntive, orari aggiornati, eventi, storia e dettagli non presenti nei dati locali.` }] },
+    tools: [{ "google_search": {} }]
   };
 
   try {
