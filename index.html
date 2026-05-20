@@ -9,43 +9,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght=0,400;0,600;0,700;1,400&family=DM+Sans:wght=300;400;500;600&display=swap" rel="stylesheet"/>
 
-<!-- Leaflet CDN (CSS & JS) -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-<!-- FIX CRITICO: Il tag script esterno non può contenere codice inline, va chiuso prima -->
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-<!-- NUOVO: Leaflet MarkerCluster per Ottimizzazione Mappa -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
 <script>
-function removeItem(tipo,index){
-  if(!confirm('Vuoi davvero eliminare questo elemento?')) return;
-
-  if(tipo==='luoghi'){
-    LUOGHI.splice(index,1);
-    renderLuoghi();
-  }
-
-  if(tipo==='trek'){
-    SENTIERI.splice(index,1); // FIX: Era TREKKING, ma l'array si chiama SENTIERI
-    renderTrek();
-  }
-
-  if(tipo==='ristoranti'){
-    RISTORANTI.splice(index,1);
-    renderRest();
-  }
-
-  if(tipo==='alloggi'){
-    ALLOGGI_DEFAULT.splice(index,1);
-    renderAlloggi();
-  }
-
-  showToast('Elemento rimosso');
-}
-
+// FIX: Rimossa la funzione obsoleta removeItem(tipo, index) che causava bug di eliminazione errata.
 
 let ACTIVE_MARKER = null;
 
@@ -56,13 +28,10 @@ function clearSelectedCards(){
 }
 
 function focusPOI(coords,title,cardEl){
-
   clearSelectedCards();
-
   if(cardEl){
     cardEl.classList.add('selected-card');
   }
-
   if(ACTIVE_MARKER){
     map.removeLayer(ACTIVE_MARKER);
   }
@@ -87,10 +56,9 @@ function focusPOI(coords,title,cardEl){
 }
 
 function fitAllPremium(){
-  const group = new L.featureGroup(allMarkers); // FIX: Era 'markers', corretto con 'allMarkers'
+  const group = new L.featureGroup(allMarkers);
   map.fitBounds(group.getBounds().pad(0.2));
 }
-
 </script>
 
 <style>
@@ -244,11 +212,9 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);c
 #map-container{width:100%;height:100%}
 .leaflet-popup-content-wrapper{border-radius:12px!important;font-family:'DM Sans',sans-serif}
 .leaflet-popup-content b{color:var(--forest);font-size:14px}
-/* Fix Z-index per i controlli base della mappa */
 .leaflet-control-layers { border-radius: 8px !important; border: 1px solid var(--border) !important; font-family: 'DM Sans', sans-serif !important; }
 
-
-/* Animazione Marker Lampeggiante */
+/* Animazione Marker */
 @keyframes markerPulse {
   0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(232, 160, 32, 0.7); }
   50% { transform: scale(1.3); box-shadow: 0 0 0 15px rgba(232, 160, 32, 0); }
@@ -259,7 +225,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);c
   z-index: 1000 !important;
 }
 
-/* NUOVO: Stile personalizzato per i cluster sulla mappa */
+/* Stile personalizzato cluster */
 .marker-cluster-custom {
   background-clip: padding-box;
   border-radius: 20px;
@@ -310,8 +276,6 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);c
   #main{flex-direction:column}
   #map-container{height:calc(100vh - 58px)}
   .mob-toggle{display:flex!important}
-  
-  /* Ottimizzazioni Header e Chat per Mobile */
   #header h1{font-size:18px;}
   .hide-mobile{display:none!important;}
   .txt-hide-mob{display:none;}
@@ -321,19 +285,17 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);c
 }
 .mob-toggle{display:none;background:var(--forest);color:#fff;border:none;padding:8px 14px;cursor:pointer;font-size:22px}
 
-/* Scroll bar */
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:var(--cream)}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:99px}
-
-/* Loader */
 .spinner{display:inline-block;width:18px;height:18px;border:2px solid var(--border);
   border-top-color:var(--forest);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* ── MODAL AGGIUNTA EVENTI E LUOGHI ── */
+/* ── MODALS AGGIUNTA / PASSAPORTO / SETTINGS ── */
+/* FIX: Alzato lo z-index da 2000 a 10000 per evitare sovrapposizioni con la chat AI */
 .modal-overlay{
-  display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;
   align-items:center;justify-content:center;
 }
 .modal-overlay.open{display:flex}
@@ -352,6 +314,12 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);c
 .form-row input:focus,.form-row textarea:focus{border-color:var(--sage)}
 .form-row textarea{resize:vertical;min-height:70px}
 .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+
+/* Passaporto Badges */
+#passaporto-modal .badge-unlocked { background: var(--gold); color: var(--forest); padding: 5px 10px; border-radius: 8px; font-weight: bold; margin: 4px; display: inline-block; font-size:12px; border: 1px solid #d4931c; }
+#passaporto-modal .badge-locked { background: var(--cream); color: var(--muted); padding: 5px 10px; border-radius: 8px; border: 1px dashed var(--border); margin: 4px; display: inline-block; font-size:12px; }
+.checkin-btn { background: #27ae60; color: #fff; }
+.checkin-btn[disabled] { background: var(--border); color: var(--muted); cursor: not-allowed; }
 
 /* ── AI CHAT WIDGET ── */
 #chat-widget {
@@ -421,12 +389,6 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);c
   background:#8e0000;
 }
 
-/* ── MODAL PASSAPORTO E CHECK-IN ── */
-#passaporto-modal .badge-unlocked { background: var(--gold); color: var(--forest); padding: 5px 10px; border-radius: 8px; font-weight: bold; margin: 4px; display: inline-block; font-size:12px; border: 1px solid #d4931c; }
-#passaporto-modal .badge-locked { background: var(--cream); color: var(--muted); padding: 5px 10px; border-radius: 8px; border: 1px dashed var(--border); margin: 4px; display: inline-block; font-size:12px; }
-.checkin-btn { background: #27ae60; color: #fff; }
-.checkin-btn[disabled] { background: var(--border); color: var(--muted); cursor: not-allowed; }
-
 /* PREMIUM MAP STYLES */
 .selected-card{
   border:3px solid #d32f2f !important;
@@ -453,17 +415,14 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);c
 </head>
 <body>
 
-<!-- HEADER -->
 <header id="header">
   <h1>⛵ Madonie <span class="hide-mobile">Parco Nazionale</span></h1>
   <div class="hdr-nav">
-    <!-- VISUAL AI UPLOAD -->
     <input type="file" id="vision-upload" accept="image/*" style="display:none" onchange="analizzaFotoAI(event)"/>
     <button class="hdr-btn" onclick="document.getElementById('vision-upload').click()" aria-label="Riconoscimento visivo AI" title="Scatta o carica foto per riconoscerla" style="background:var(--sage);border-color:var(--sage)">📸 <span class="txt-hide-mob">Cos'è?</span></button>
     
     <button class="hdr-btn" onclick="chiediConsiglioMeteoAI()" aria-label="Consigli AI per meteo" title="Consigli in base al meteo" style="background:var(--forest);border-color:var(--gold);color:var(--gold)">⛅ <span class="txt-hide-mob">Cosa fare oggi?</span></button>
     
-    <!-- NUOVO BOTTONE PASSAPORTO -->
     <button class="hdr-btn" onclick="mostraPassaporto()" aria-label="Apri Passaporto e Check-in" title="Il tuo Passaporto delle Madonie" style="background:#27ae60;border-color:#27ae60">📘 <span class="txt-hide-mob">Passaporto</span></button>
 
     <button class="hdr-btn mob-toggle" aria-label="Apri menu laterale" onclick="toggleSidebar()">☰</button>
@@ -474,7 +433,6 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);c
 </header>
 
 <div id="main">
-  <!-- SIDEBAR -->
   <div id="sidebar">
     <div id="tabs">
       <button class="tab active" onclick="switchTab('luoghi')" aria-label="Vai a sezione Luoghi"><span class="tab-emoji">🏛</span>Luoghi</button>
@@ -486,7 +444,6 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);c
     </div>
     <div id="sidebar-content">
 
-      <!-- PANEL: LUOGHI -->
       <div class="panel active" id="panel-luoghi">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <input class="search-box" id="search-luoghi" placeholder="🔍 Cerca borgo, rifugio, castello…" oninput="filterLuoghi()" style="flex:1;margin-right:8px"/>
@@ -542,7 +499,6 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
         <div id="vicini-a-me"></div>
       </div>
 
-      <!-- PANEL: TREKKING -->
       <div class="panel" id="panel-trekking">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <input class="search-box" id="search-trek" placeholder="🔍 Cerca sentiero…" oninput="filterTrek()" style="flex:1;margin-right:8px"/>
@@ -609,7 +565,6 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
         <div id="list-trek"></div>
       </div>
 
-      <!-- PANEL: RISTORANTI -->
       <div class="panel" id="panel-ristoranti">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <input class="search-box" id="search-rest" placeholder="🔍 Cerca ristorante o cucina…" oninput="filterRest()" style="flex:1;margin-right:8px"/>
@@ -664,12 +619,11 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
             <p id="tripadvisor-city-label" style="font-size:11px;color:var(--muted);margin-top:4px;text-align:center">Seleziona una città per aprire TripAdvisor</p>
           </div>
         </div>
-        <div class="section-title">Ristoranti &amp; Agriturismi</div>
+        <div class="section-title">Ristoranti & Agriturismi</div>
         <div class="count-label" id="count-rest"></div>
         <div id="list-rest"></div>
       </div>
 
-      <!-- PANEL: ALLOGGI -->
       <div class="panel" id="panel-alloggi">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <input class="search-box" id="search-alloggi" placeholder="🔍 Cerca alloggio (es. Nome, zona...)" oninput="filterAlloggi()" style="flex:1;margin-right:8px"/>
@@ -737,70 +691,66 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
         <div id="list-alloggi"></div>
       </div>
 
-      <!-- PANEL: EVENTI -->
       <div class="panel" id="panel-eventi">
         <div class="section-title" style="margin-top:4px">🏛 Portali ufficiali</div>
         <p style="font-size:12px;color:var(--muted);margin-bottom:8px;line-height:1.5">Fonti istituzionali stabili per eventi nel Madonie.</p>
+        
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+          <a href="https://www.enjoysicilia.it/it/feste-sagre-eventi-zona-cefalu-madonie/" target="_blank"
+          style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#8e24aa,#ba68c8);
+          color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:12px;font-weight:600">
+          <span style="font-size:18px">🎉</span>
+          <div>
+          <div>Eventi & Sagre Madonie</div>
+          <div style="font-size:10px;opacity:.85">enjoysicilia.it</div>
+          </div>
+          <span style="margin-left:auto">↗</span>
+          </a>
 
-<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">
+          <a href="https://www.parcodellemadonie.it/" target="_blank"
+          style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2e7d32,#66bb6a);
+          color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:12px;font-weight:600">
+          <span style="font-size:18px">🏔</span>
+          <div>
+          <div>Parco delle Madonie</div>
+          <div style="font-size:10px;opacity:.85">parcodellemadonie.it</div>
+          </div>
+          <span style="margin-left:auto">↗</span>
+          </a>
 
-<a href="https://www.enjoysicilia.it/it/feste-sagre-eventi-zona-cefalu-madonie/" target="_blank"
-style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#8e24aa,#ba68c8);
-color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:12px;font-weight:600">
-<span style="font-size:18px">🎉</span>
-<div>
-<div>Eventi & Sagre Madonie</div>
-<div style="font-size:10px;opacity:.85">enjoysicilia.it</div>
-</div>
-<span style="margin-left:auto">↗</span>
-</a>
+          <a href="https://www.visitsicily.info/#" target="_blank"
+          style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1565c0,#42a5f5);
+          color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:12px;font-weight:600">
+          <span style="font-size:18px">🌍</span>
+          <div>
+          <div>Visit Sicily</div>
+          <div style="font-size:10px;opacity:.85">visitsicily.info</div>
+          </div>
+          <span style="margin-left:auto">↗</span>
+          </a>
 
-<a href="https://www.parcodellemadonie.it/" target="_blank"
-style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#2e7d32,#66bb6a);
-color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:12px;font-weight:600">
-<span style="font-size:18px">🏔</span>
-<div>
-<div>Parco delle Madonie</div>
-<div style="font-size:10px;opacity:.85">parcodellemadonie.it</div>
-</div>
-<span style="margin-left:auto">↗</span>
-</a>
+          <a href="https://www.ypsigrock.it/festival/" target="_blank"
+          style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#d81b60,#f06292);
+          color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:12px;font-weight:600">
+          <span style="font-size:18px">🎸</span>
+          <div>
+          <div>Ypsigrock Festival</div>
+          <div style="font-size:10px;opacity:.85">ypsigrock.it</div>
+          </div>
+          <span style="margin-left:auto">↗</span>
+          </a>
 
-<a href="https://www.visitsicily.info/#" target="_blank"
-style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#1565c0,#42a5f5);
-color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:12px;font-weight:600">
-<span style="font-size:18px">🌍</span>
-<div>
-<div>Visit Sicily</div>
-<div style="font-size:10px;opacity:.85">visitsicily.info</div>
-</div>
-<span style="margin-left:auto">↗</span>
-</a>
-
-<a href="https://www.ypsigrock.it/festival/" target="_blank"
-style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#d81b60,#f06292);
-color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:12px;font-weight:600">
-<span style="font-size:18px">🎸</span>
-<div>
-<div>Ypsigrock Festival</div>
-<div style="font-size:10px;opacity:.85">ypsigrock.it</div>
-</div>
-<span style="margin-left:auto">↗</span>
-</a>
-
-<a href="https://www.prolococastelbuono.it/" target="_blank"
-style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#ef6c00,#ffb74d);
-color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:12px;font-weight:600">
-<span style="font-size:18px">🏛</span>
-<div>
-<div>Pro Loco Castelbuono</div>
-<div style="font-size:10px;opacity:.85">prolococastelbuono.it</div>
-</div>
-<span style="margin-left:auto">↗</span>
-</a>
-
-</div>
-
+          <a href="https://www.prolococastelbuono.it/" target="_blank"
+          style="display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,#ef6c00,#ffb74d);
+          color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:12px;font-weight:600">
+          <span style="font-size:18px">🏛</span>
+          <div>
+          <div>Pro Loco Castelbuono</div>
+          <div style="font-size:10px;opacity:.85">prolococastelbuono.it</div>
+          </div>
+          <span style="margin-left:auto">↗</span>
+          </a>
+        </div>
 
         <div class="section-title" style="margin-top:16px">🔍 Cerca eventi adesso</div>
         <div id="eventi-date-label" style="font-size:11px;color:var(--muted);margin-bottom:6px"></div>
@@ -816,7 +766,6 @@ color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:1
         <div id="social-eventi"></div>
       </div>
 
-      <!-- PANEL: ITINERARI -->
       <div class="panel" id="panel-itinerari">
         <div class="section-title">Generatore AI Su Misura ✨</div>
         <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Descrivi il tuo viaggio ideale e l'AI creerà un percorso perfetto per te.</p>
@@ -834,9 +783,7 @@ color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:1
             <option value="natura">Natura e foreste</option>
             <option value="gastronomico">Gastronomico</option>
             <option value="trekking">Trekking & Sport</option>
-            <option value="montagna">Borghi e Natura</option>
             <option value="borghi">Borghi e castelli</option>
-            <option value="famiglia">Famiglia con bambini</option>
           </select>
         </div>
         <div class="form-row">
@@ -869,16 +816,11 @@ color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:1
         </div>
       </div>
 
-    </div><!-- /sidebar-content -->
-  </div><!-- /sidebar -->
-
-  <!-- MAPPA -->
-  <div id="map">
+    </div></div><div id="map">
     <div id="map-container"></div>
   </div>
 </div>
 
-<!-- INFO PANEL -->
 <div id="info-panel">
   <button id="info-close" onclick="closeInfo()">✕</button>
   <h2 id="info-name"></h2>
@@ -890,22 +832,18 @@ color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:1
   <div id="info-add-route" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
     <button class="btn" id="btn-add-current-route" style="background:var(--forest)">+ Aggiungi al percorso</button>
     <div id="info-web-btn"></div>
-    <!-- FIX: Aggiunto pulsante di navigazione esterna Google Maps -->
     <a href="#" id="btn-naviga-google" target="_blank" class="btn btn-outline" style="background:#fff;border-color:var(--sky);color:var(--sky);display:none;text-decoration:none">🧭 Naviga lì</a>
   </div>
 </div>
 
-<!-- STATS BAR -->
 <div id="stats-bar">
   <div class="stat-item"><span id="stat-visible">0</span> visibili (Tutto)</div>
   <div id="route-info"></div>
   <button id="btn-share-route" onclick="condividiPercorso()" style="display:none;background:var(--gold);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer">📤 Condividi</button>
 </div>
 
-<!-- TOAST -->
 <div id="toast"></div>
 
-<!-- AI CHAT WIDGET -->
 <div id="chat-widget">
   <div id="chat-panel">
     <div id="chat-header">
@@ -923,12 +861,7 @@ color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:1
   </div>
   <button id="chat-btn" aria-label="Apri assistente virtuale AI" onclick="toggleChat()">🤖</button>
 </div>
-  </div>
-  <button id="chat-btn" onclick="toggleChat()">🤖</button>
-</div>
 
-<!-- MODALS -->
-<!-- MODAL RISTORANTE -->
 <div class="modal-overlay" id="ristorante-modal">
   <div class="modal-box">
     <h2>🍽 Aggiungi ristorante</h2>
@@ -987,7 +920,6 @@ color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:1
   </div>
 </div>
 
-<!-- MODAL SENTIERO -->
 <div class="modal-overlay" id="sentiero-modal">
   <div class="modal-box">
     <h2>🥾 Aggiungi sentiero</h2>
@@ -1034,11 +966,11 @@ color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:1
     <div style="display:flex;gap:8px">
       <div class="form-row" style="flex:1;margin-bottom:0">
         <label>Lat. partenza *</label>
-        <input type="number" id="trek-lat" placeholder="Es. 41.8400" step="0.0001"/>
+        <input type="number" id="trek-lat" placeholder="Es. 37.9315" step="0.0001"/>
       </div>
       <div class="form-row" style="flex:1;margin-bottom:0">
         <label>Lng. partenza *</label>
-        <input type="number" id="trek-lng" placeholder="Es. 15.9700" step="0.0001"/>
+        <input type="number" id="trek-lng" placeholder="Es. 14.0894" step="0.0001"/>
       </div>
     </div>
     <button class="btn btn-outline" onclick="usaGPS('trek')" style="font-size:12px;width:100%;margin:10px 0">🗺 Cattura Coordinate da Mappa</button>
@@ -1049,7 +981,6 @@ color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:1
   </div>
 </div>
 
-<!-- MODAL LUOGO -->
 <div class="modal-overlay" id="luogo-modal">
   <div class="modal-box">
     <h2>📍 Aggiungi luogo</h2>
@@ -1094,7 +1025,6 @@ color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:1
   </div>
 </div>
 
-<!-- MODAL ALLOGGIO -->
 <div class="modal-overlay" id="alloggio-modal">
   <div class="modal-box">
     <h2>🏨 Aggiungi alloggio consigliato</h2>
@@ -1152,7 +1082,6 @@ color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:1
   </div>
 </div>
 
-<!-- NUOVO: MODAL IMPOSTAZIONI (Sicurezza e Dati) -->
 <div class="modal-overlay" id="settings-modal">
   <div class="modal-box">
     <h2>⚙️ Impostazioni e Dati</h2>
@@ -1176,7 +1105,6 @@ color:#fff;border-radius:12px;padding:10px 12px;text-decoration:none;font-size:1
   </div>
 </div>
 
-<!-- MODAL PASSAPORTO -->
 <div class="modal-overlay" id="passaporto-modal">
   <div class="modal-box" style="max-height:85vh; overflow-y:auto;">
     <h2>📘 Passaporto delle Madonie</h2>
@@ -1269,19 +1197,14 @@ const LUOGHI = [
 {name:"Castello dei Ventimiglia",cat:"cultura",coords:[37.9322,14.0888],desc:"Castello simbolo di Castelbuono.",pop:true}
 ];
 
+// FIX: Ripuliti interamente i sentieri per rimuovere le contaminazioni del Gargano
 const SENTIERI = [
-{name:"Sentiero delle Sette Baie – Castelbuono",diff:"M",km:12,h:"4-5h",start:"Castelbuono – Lungomontagna",coords:[[37.9315,14.0894],[37.9450,14.1020]],url:"https://it.wikiloc.com/percorsi/escursionismo/italia/Sicilia/Palermo",desc:"Il sentiero piu panoramico del Madonie: costeggia sette baie spettacolari tra cale e falesie calcaree."},
-{name:"Boschi delle Madonie – Anello dei Faggi",diff:"F",km:7,h:"2.5-3h",start:"Centro Visitatori Boschi delle Madonie",coords:[[41.8400,15.9700],[41.8350,15.9800]],url:"https://it.wikiloc.com/percorsi/escursionismo/italia/Sicilia",desc:"Anello tra i faggi monumentali della Boschi delle Madonie, alcuni con oltre 500 anni. Adatto alle famiglie."},
-{name:"Sentiero Quacella – Pizzo Carbonara",diff:"M",km:10,h:"3.5-4h",start:"Monte San Salvatore",coords:[[37.8598,14.1572],[41.7200,16.0000]],url:"https://www.alltrails.com/it-it/parchi/italy/Sicily/parco-nazionale-del-madonie",desc:"Dal borgo medievale verso la montagna con vista sull'Adriatico e il Golfo di Castellana Sicula."},
-{name:"Bosco della Ficuzza – Sentiero Panoramico",diff:"M",km:6,h:"2-3h",start:"Collesano – bivio SS89",coords:[[41.7109,16.0629],[41.7050,15.9600]],url:"https://it.wikiloc.com/percorsi/escursionismo/italia/Sicilia/Palermo",desc:"Sentiero che scende alla Bosco della Ficuzza tra faraglioni e acque turchesi. Tratto finale ripido ma spettacolare."},
-{name:"Lago di Varano – Anello Costiero",diff:"F",km:9,h:"3-3.5h",start:"Petralia Sottana – Porto",coords:[[41.8920,15.7670],[41.8800,15.7500]],url:"https://it.wikiloc.com/percorsi/escursionismo/italia/Sicilia",desc:"Anello attorno al Lago di Varano tra canneti, pinete e villaggi di pescatori. Avifauna ricchissima."},
-{name:"Petralia Soprana – Grotte Costiere",diff:"F",km:5,h:"2h",start:"Porto di Petralia Soprana",coords:[[37.8097,14.1084],[41.9500,15.9450]],url:"https://www.alltrails.com/it-it/parchi/italy/Sicily/parco-nazionale-del-madonie",desc:"Percorso tra le scogliere bianche di Petralia Soprana con accesso a piccole grotte e cale nascoste."},
-{name:"Sentiero CAI Madonie – Piano Battaglia",diff:"D",km:18,h:"6-7h",start:"Vico del Madonie",coords:[[37.8117,14.0034],[41.8400,15.9700]],url:"https://www.madonienatour.it/guida-sentieri-del-madonie/",desc:"Da Vico del Madonie attraverso la Boschi delle Madonie con dislivelli significativi. Per escursionisti esperti."},
-{name:"Punta Manaccora – Litorale Nord",diff:"F",km:4,h:"1.5h",start:"Petralia Soprana – bivio Punta Manaccora",coords:[[41.9520,15.9250],[41.9600,15.9100]],url:"https://it.wikiloc.com/percorsi/escursionismo/italia/Sicilia",desc:"Breve ma spettacolare cammino su promontorio calcareo con vista su Scillato e la montagna adriatica."},
-{name:"Sentiero Vallone Madonna degli Angeli",diff:"M",km:11,h:"4-4.5h",start:"Collesano – Valle Carbonara",coords:[[41.7200,16.0200],[41.7400,16.0500]],url:"https://it.wikiloc.com/percorsi/escursionismo/italia/Sicilia",desc:"Nell'entroterra garganico tra ulivi, carrubi e masserie abbandonate. Paesaggio rupestre e silenzio."},
-{name:"Sentiero del Falco – Monte San Salvatore",diff:"D",km:14,h:"5-6h",start:"Monte San Salvatore",coords:[[37.8598,14.1572],[41.6900,15.9800]],url:"https://www.alltrails.com/it-it/parchi/italy/Sicily/parco-nazionale-del-madonie",desc:"Discesa panoramica verso la montagna con viste sul Golfo di Castellana Sicula e il Tavoliere."},
-
-{name:"Alta Via del Madonie – Tappa 1",diff:"E",km:20,h:"7-8h",start:"Castelbuono",coords:[[37.9315,14.0894],[37.8117,14.0034]],url:"https://it.wikiloc.com/percorsi/escursionismo/italia/Sicilia",desc:"Prima tappa del lungo percorso che attraversa il Madonie da Castelbuono a Caccamo. Per escursionisti allenati."}
+{name:"Sentiero Agrifogli Giganti di Piano Pomo",diff:"F",km:4,h:"2h",start:"Piano Sempria",coords:[[37.8931,14.0722],[37.8850,14.0800]],url:"https://it.wikiloc.com",desc:"Passeggiata magica tra alberi monumentali unici al mondo."},
+{name:"Sentiero Geologico Rocca di Sciara",diff:"M",km:6,h:"3h",start:"Polizzi Generosa",coords:[[37.8117,14.0034],[37.8200,14.0100]],url:"https://www.madonie.it",desc:"Percorso geologico con vista spettacolare sulle valli."},
+{name:"Sentiero per Pizzo Carbonara",diff:"D",km:9,h:"4h",start:"Piano Battaglia",coords:[[37.8728,14.0165],[37.8967,14.0267]],url:"https://it.wikiloc.com",desc:"Ascesa alla vetta più alta delle Madonie (1979m). Terreno carsico e faggi."},
+{name:"Sentiero delle Aquile",diff:"M",km:8,h:"3-4h",start:"Gratteri",coords:[[37.9667,13.9667],[37.9700,13.9800]],url:"https://www.alltrails.com",desc:"Percorso panoramico dove è possibile avvistare l'aquila reale."},
+{name:"Vallone Madonna degli Angeli",diff:"M",km:5,h:"2.5h",start:"Polizzi Generosa",coords:[[37.8117,14.0034],[37.8300,14.0050]],url:"https://it.wikiloc.com",desc:"Sentiero che ospita gli ultimi esemplari al mondo di Abies nebrodensis."},
+{name:"Anello Monte San Salvatore",diff:"D",km:12,h:"5h",start:"Santuario Madonna dell'Alto",coords:[[37.8350,14.0500],[37.8400,14.0600]],url:"https://www.alltrails.com",desc:"Trekking impegnativo per chi ama i grandi panorami montani siciliani."}
 ];
 
 const RISTORANTI = [
@@ -1289,12 +1212,10 @@ const RISTORANTI = [
 {name:"A Cantunera",loc:"Cefalù",cat:"ristorante",price:"€€",cucina:"Mediterranea",coords:[38.0391,14.0232],desc:"Piatti siciliani e atmosfera informale."},
 {name:"Hosteria Cycas",loc:"Castelbuono",cat:"ristorante",price:"€€",cucina:"Tradizionale",coords:[37.9319,14.0892],desc:"Cucina tipica delle Madonie."},
 {name:"Ristorante Excalibur",loc:"Gangi",cat:"ristorante",price:"€€",cucina:"Pizzeria e Siciliana",coords:[37.7990,14.2040],desc:"Locale molto frequentato e prezzi medi."},
-
 {name:"Locanda del Marinaio",loc:"Cefalù",cat:"ristorante",price:"€€€",cucina:"Pesce Siciliano",coords:[38.0388,14.0235],desc:"Ristorante molto apprezzato per pesce fresco e vista sul mare."},
 {name:"Ristorante Kentia",loc:"Castelbuono",cat:"ristorante",price:"€€€",cucina:"Gourmet Siciliana",coords:[37.9320,14.0899],desc:"Cucina raffinata con ingredienti delle Madonie."},
 {name:"Fiasconaro Bistrot",loc:"Castelbuono",cat:"ristorante",price:"€€",cucina:"Dolci e Siciliana",coords:[37.9312,14.0885],desc:"Celebre per dolci artigianali e brunch siciliano."},
 {name:"Ristorante Cortile Pepe",loc:"Cefalù",cat:"ristorante",price:"€€€",cucina:"Mediterranea",coords:[38.0395,14.0229],desc:"Alta cucina mediterranea nel centro storico."},
-
 {name:"Nangalarruni",loc:"Castelbuono",cat:"ristorante",price:"€€",cucina:"Siciliana",coords:[37.9317,14.0888],desc:"Cucina madonita.",piatto:"Pasta con funghi delle Madonie e salsiccia locale"},
 {name:"Agriturismo Bergi",loc:"Castelbuono",cat:"agriturismo",price:"€€",cucina:"Km 0",coords:[37.9250,14.0800],desc:"Prodotti biologici locali.",piatto:"Tagliere madonita con formaggi e manna"},
 {name:"Trattoria La Lanterna",loc:"Cefalù",cat:"ristorante",price:"€€€",cucina:"Pesce",coords:[38.0390,14.0228],desc:"Storico ristorante nel centro.",piatto:"Spaghetti ai ricci di mare"},
@@ -1313,17 +1234,13 @@ const ALLOGGI_DEFAULT = [
 {name:"Hotel Ypsigro Palace",coords:[37.9318,14.0895],tipo:"hotel",prezzo:140,stelle:4,voto:"8.9 ⭐",loc:"Castelbuono",url:"https://www.ypsigropalace.it",desc:"Hotel nel centro storico."}
 ];
 
-
-
+// FIX: Ripuliti gli itinerari da contaminazioni estranee
 const ITINERARI_PREDEFINITI = [
-{name:"Castelbuono e la Costa dei rifugi montani",tema:"storico",giorni:1,desc:"La citta bianca del Madonie: centro storico medievale, pizzomunno, castello medievale e sentieri naturalistici.",tappe:["Centro storico di Castelbuono","Castello di Castelbuono","Pizzomunno – Castelbuono","Diving e Snorkeling – Castelbuono","Ristorante Il Trabucco – Castelbuono"],km:5,coords:[[37.85,14.05]]},
-{name:"Monte San Salvatore e Padre Pio",tema:"storico",giorni:1,desc:"UNESCO e spiritualita: Basilica di San Michele, Tomba di Rotari e il santuario di Padre Pio.",tappe:["Duomo di Cefalù","Tomba di Rotari – Monte San Salvatore","Cefalù","Santuario di Padre Pio"],km:30,coords:[[41.7065,15.9600],[41.7075,15.9615],[37.8598,14.1572],[41.7080,15.7250]]},
-{name:"Boschi delle Madonie e Borghi",tema:"natura",giorni:2,desc:"Due giorni nel cuore verde del Madonie: foresta secolare, fauna e borghi tra gli ulivi.",tappe:["Boschi delle Madonie – Centro Visitatori","Vico del Madonie","Gangi","Polizzi Generosa","Petralia Soprana"],km:55,coords:[[41.8400,15.9600],[37.8117,14.0034],[41.9041,15.8963],[41.9289,15.8883],[37.8097,14.1084]]},
-{name:"Tour del Gusto",tema:"gastronomico",giorni:2,desc:"Olio DOP, cipolla IGP, anguille di Scillato, formaggi di masseria e limoni di Rodi.",tappe:["Olio DOP del Madonie – Frantoi","Cipolla Bianca di Gangi IGP","Masserie del Madonie – Formaggi","Agrumeto di Polizzi Generosa","Trattoria del Lago"],km:80,coords:[[41.8800,15.9500],[41.9050,15.8960],[41.7500,15.9000],[41.9289,15.8883],[41.8600,15.3490]]},
-{name:"Borghi del Mare",tema:"borghi",giorni:2,desc:"Da Castelbuono a Rodi: borghi bianchi, porti, sentieri e tramonti sull'Adriatico.",tappe:["Castelbuono","Petralia Soprana","Polizzi Generosa","Vico del Madonie","Gangi"],km:50,coords:[[37.9315,14.0894],[37.8097,14.1084],[41.9289,15.8883],[37.8117,14.0034],[41.9041,15.8963]]},
-{name:"Trekking Costiero e Foresta",tema:"trekking",giorni:3,desc:"Per gli escursionisti: sentiero delle Sette Baie, Boschi delle Madonie e la Bosco della Ficuzza.",tappe:["Sentiero delle Sette Baie – Castelbuono","Boschi delle Madonie – Anello dei Faggi","Bosco della Ficuzza – Sentiero Panoramico","Sentiero Vallone Madonna degli Angeli","Petralia Soprana – Grotte Costiere"],km:60,coords:[[37.9315,14.0894],[41.8400,15.9700],[41.7109,16.0629],[41.7200,16.0200],[37.8097,14.1084]]},
-{name:"Famiglia con bambini",tema:"famiglia",giorni:2,desc:"percorsi naturalistici, prodotti tipici, borgo medievale e natura adatta ai piu piccoli.",tappe:["Piano Battaglia","Petralia Soprana – Grotte Costiere","Boschi delle Madonie – Anello dei Faggi","Centro Storico di Castelbuono","Gelateria Tropical"],km:40,coords:[[41.9580,15.9230],[37.8097,14.1084],[41.8400,15.9700]]},
-{name:"Costa e Laghi",tema:"montagna",giorni:2,desc:"Il Madonie nascosto: i laghi costieri di Scillato e Varano, oasi naturali tra acqua e cielo.",tappe:["Scillato","Lago di Scillato","Lago di Varano","Petralia Sottana","Alimena"],km:60,coords:[[41.8598,15.3493],[41.8670,15.3330],[41.8920,15.7670],[41.8303,15.7748],[41.7123,15.6367]]}
+{name:"Castelbuono e i sapori antichi",tema:"storico",giorni:1,desc:"La cittadina simbolo delle Madonie: centro storico medievale, il Castello dei Ventimiglia e la degustazione di Manna.",tappe:["Castelbuono","Castello dei Ventimiglia","Fiasconaro Bistrot","Agriturismo Bergi"],km:5,coords:[[37.9315,14.0894],[37.9322,14.0888],[37.9312,14.0885],[37.9250,14.0800]]},
+{name:"Tra Borghi e Natura",tema:"natura",giorni:2,desc:"Due giorni nel cuore verde delle Madonie: foreste secolari, fauna e borghi antichi.",tappe:["Petralia Sottana","Piano Battaglia","Polizzi Generosa","Petralia Soprana"],km:45,coords:[[37.8080,14.0920],[37.8728,14.0165],[37.8117,14.0034],[37.8097,14.1084]]},
+{name:"Tour del Gusto Madonita",tema:"gastronomico",giorni:2,desc:"Olio DOP, provola delle Madonie, sfoglio di Polizzi e la famosa manna di Castelbuono.",tappe:["Castelbuono","Hosteria Cycas","Polizzi Generosa","Gangi","Osteria Pecora Nera"],km:60,coords:[[37.9315,14.0894],[37.9319,14.0892],[37.8117,14.0034],[37.7986,14.2041],[37.7992,14.2035]]},
+{name:"I Borghi più Belli",tema:"borghi",giorni:2,desc:"Un viaggio tra i vicoli di pietra, le chiese normanne e i panorami mozzafiato.",tappe:["Cefalù","Duomo di Cefalù","Geraci Siculo","Gangi"],km:50,coords:[[38.0383,14.0222],[38.0392,14.0226],[37.8598,14.1572],[37.7986,14.2041]]},
+{name:"Trekking e Vette",tema:"trekking",giorni:3,desc:"Per gli escursionisti: Piano Battaglia, Monte San Salvatore e gli Agrifogli Giganti.",tappe:["Piano Battaglia","Petralia Sottana","Bosco Pomieri","Castelbuono"],km:40,coords:[[37.8728,14.0165],[37.8080,14.0920],[37.9360,14.0990],[37.9315,14.0894]]}
 ];
 
 // ═══════════════════════════════════════════════════════════
@@ -1341,7 +1258,7 @@ localStorage.setItem('madonie_alloggi_consigliati', JSON.stringify(ALLOGGI_DEFAU
 let ITINERARI_CUSTOM    = JSON.parse(localStorage.getItem('madonie_itin') || '[]');
 let ITINERARI_NASCOSTI  = JSON.parse(localStorage.getItem('madonie_itin_nascosti') || '[]');
 let VALUTAZIONI         = JSON.parse(localStorage.getItem('madonie_valutazioni') || '{}');
-let CHECKINS            = JSON.parse(localStorage.getItem('madonie_checkins') || '[]'); // NUOVO: Gamification
+let CHECKINS            = JSON.parse(localStorage.getItem('madonie_checkins') || '[]');
 
 LUOGHI_CUSTOM.forEach(c => { if (!LUOGHI.find(l => l.name === c.name && l.custom)) LUOGHI.push(c); });
 SENTIERI_CUSTOM.forEach(c => { if (!SENTIERI.find(s => s.name === c.name && s.custom)) SENTIERI.push(c); });
@@ -1351,7 +1268,7 @@ RISTORANTI_CUSTOM.forEach(c => { if (!RISTORANTI.find(r => r.name === c.name && 
 // MAPPA, MARKERS E AGGIORNAMENTO UNIFICATO
 // ═══════════════════════════════════════════════════════════
 let map; 
-let markerClusterGroup; // Variabile per il Clustering dei marker
+let markerClusterGroup;
 let allMarkers = [];
 let routeLine = null;
 let currentRouteCoords = [];
@@ -1395,11 +1312,9 @@ function clearMapMarkers(){
   document.querySelectorAll('.marker-icon-custom div').forEach(el => el.classList.remove('marker-active-pulse'));
 }
 
-// Funzione master: Disegna tutti i marker attivi contemporaneamente
 function updateMap() {
   clearMapMarkers();
   
-  // Inizializza cluster se non esiste
   if(!markerClusterGroup && map) {
     markerClusterGroup = L.markerClusterGroup({
       chunkedLoading: true,
@@ -1413,7 +1328,6 @@ function updateMap() {
 
   let visibleCount = 0;
   
-  // 1. Luoghi
   const qL = document.getElementById('search-luoghi').value.toLowerCase();
   LUOGHI.forEach(p => {
     const catOK = activeLuoghiCats.has('tutte') || activeLuoghiCats.has(p.cat);
@@ -1430,7 +1344,6 @@ function updateMap() {
     }
   });
 
-  // 2. Trekking (Solo punti di partenza, NO LINEE continue per non sporcare la mappa)
   const qT = document.getElementById('search-trek').value.toLowerCase();
   SENTIERI.forEach(s => {
     const dOK = activeDiff === 'tutte' || s.diff === activeDiff;
@@ -1449,7 +1362,6 @@ function updateMap() {
     }
   });
 
-  // 3. Ristoranti
   const qR = document.getElementById('search-rest').value.toLowerCase();
   const cR = document.getElementById('filter-rest-city').value;
   RISTORANTI.forEach(r => {
@@ -1469,7 +1381,6 @@ function updateMap() {
     }
   });
 
-  // 4. Alloggi
   const qA = document.getElementById('search-alloggi').value.toLowerCase();
   const cA = document.getElementById('filter-alloggi-city').value;
   ALLOGGI_CONSIGLIATI.forEach(a => {
@@ -1539,9 +1450,7 @@ function showInfoByName(name, type) {
   if(p.start) ex.innerHTML += `<p style="font-size:12px;color:var(--muted);margin-top:4px">🚩 Partenza: ${p.start}</p>`;
   if(p.cucina) ex.innerHTML += `<p style="font-size:12px;color:var(--muted);margin-top:4px">🍴 Cucina: ${p.cucina}</p>`;
 
-  const foodCats = ['ristorante','osteria','trattoria','pizzeria','agriturismo','gelateria','pasticceria','bar','enoteca'];
   if(type === 'ristorante'){
-    
     if(p.piatto){
       ex.innerHTML += `
       <div style="margin-top:10px;padding:10px;background:#fff7e8;border:1px solid #f0d18a;border-radius:10px">
@@ -1549,7 +1458,6 @@ function showInfoByName(name, type) {
         <div style="font-size:13px;color:#444">${p.piatto}</div>
       </div>`;
     }
-
     const btnHtml = `
     <button class="btn"
       style="background:linear-gradient(135deg,#8d6e63,#5d4037);
@@ -1560,11 +1468,8 @@ function showInfoByName(name, type) {
       data-l="${p.loc||''}"
       data-c="${p.cucina||''}"
       onclick="chiediSommelierAI(this.dataset.n, this.dataset.l, this.dataset.c)">
-
       🧑‍🍳 Cosa ordino qui? (Consiglio AI)
-
     </button>`;
-
     ex.innerHTML += btnHtml;
   }
 
@@ -1577,7 +1482,7 @@ function showInfoByName(name, type) {
   renderRatingBtns(document.getElementById('info-rating'), name);
   
   const meteoEl = document.getElementById('info-meteo');
-  const btnGoogle = document.getElementById('btn-naviga-google'); // FIX: Aggiunto bottone navigazione Google Maps
+  const btnGoogle = document.getElementById('btn-naviga-google');
   
   if (p.coords) {
     const lat = Array.isArray(p.coords[0]) ? p.coords[0][0] : p.coords[0];
@@ -1586,7 +1491,7 @@ function showInfoByName(name, type) {
     meteoEl.innerHTML = '<span style="opacity:.6">⏳ Meteo in carico…</span>';
     fetchMeteo(lat, lon, meteoEl);
     
-    btnGoogle.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
+    btnGoogle.href = `https://www.google.com/maps/dir/?api=1&destination=$${lat},${lon}`;
     btnGoogle.style.display = 'inline-block';
   } else {
     meteoEl.innerHTML = '';
@@ -1596,7 +1501,6 @@ function showInfoByName(name, type) {
   const addRouteBtn = document.getElementById('btn-add-current-route');
   addRouteBtn.onclick = () => addPopupToRouteByName(p.name, type);
 
-  // NUOVO: Aggiunta bottone Check-in GPS
   const infoAddRoute = document.getElementById('info-add-route');
   let checkinBtn = document.getElementById('btn-checkin');
   if(!checkinBtn) {
@@ -1606,7 +1510,6 @@ function showInfoByName(name, type) {
     infoAddRoute.appendChild(checkinBtn);
   }
   
-  // Verifica stato checkin
   if (CHECKINS.includes(p.name)) {
     checkinBtn.innerHTML = '✅ Visitato';
     checkinBtn.disabled = true;
@@ -1617,7 +1520,6 @@ function showInfoByName(name, type) {
     checkinBtn.onclick = () => eseguiCheckIn(p.name, p.coords);
   }
 
-  // NUOVO: Aggiunta bottone Audioguida AI
   let audioBtn = document.getElementById('btn-audioguida');
   if(!audioBtn) {
     audioBtn = document.createElement('button');
@@ -1629,14 +1531,12 @@ function showInfoByName(name, type) {
   audioBtn.innerHTML = '🎧 Ascolta (AI)';
   audioBtn.onclick = () => generaEAscolta(p.name, type, p.desc);
   
-  // Interrompi l'audio se l'utente chiude il pannello
   const closeBtn = document.getElementById('info-close');
   closeBtn.onclick = () => {
      if(window.speechSynthesis) window.speechSynthesis.cancel();
      closeInfo();
   };
 
-  // NUOVO: Profilo Altimetrico per Trekking
   let altimetriaEl = document.getElementById('info-altimetria');
   if(!altimetriaEl) {
     altimetriaEl = document.createElement('div');
@@ -1669,7 +1569,7 @@ async function fetchMeteo(lat, lon, el) {
     const d = await r.json();
     const c = d.current;
     const desc = WMO[c.weathercode] || '🌡 Meteo';
-    el.innerHTML = `${desc} &nbsp;·&nbsp; <b>${Math.round(c.temperature_2m)}°C</b> &nbsp;·&nbsp; 💨 ${Math.round(c.windspeed_10m)} km/h`;
+    el.innerHTML = `${desc}  ·  <b>${Math.round(c.temperature_2m)}°C</b>  ·  💨 ${Math.round(c.windspeed_10m)} km/h`;
   } catch(e) { el.innerHTML = ''; }
 }
 
@@ -1829,6 +1729,7 @@ function salvaLuogo() {
   localStorage.setItem('madonie_luoghi_custom', JSON.stringify(LUOGHI_CUSTOM));
   closeModal('luogo-modal'); renderLuoghi(); updateMap(); showToast(`"${nome}" aggiunto! ✅`);
 }
+
 function eliminaLuogoCustom(name) {
   LUOGHI_CUSTOM = LUOGHI_CUSTOM.filter(x => x.name !== name);
   const idx = LUOGHI.findIndex(x => x.name === name); if(idx > -1) LUOGHI.splice(idx, 1);
@@ -2201,7 +2102,7 @@ function ripristinaItinerari() {
 
 // ── BACKUP / RESTORE ──
 function exportData(){
-  const data={ LUOGHI_CUSTOM, SENTIERI_CUSTOM, RISTORANTI_CUSTOM, ALLOGGI_CONSIGLIATI, ITINERARI_CUSTOM, VALUTAZIONI, CHECKINS }; // FIX: aggiunto CHECKINS al backup
+  const data={ LUOGHI_CUSTOM, SENTIERI_CUSTOM, RISTORANTI_CUSTOM, ALLOGGI_CONSIGLIATI, ITINERARI_CUSTOM, VALUTAZIONI, CHECKINS }; 
   const blob=new Blob([JSON.stringify(data)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a'); a.href=url; a.download='madonie_backup.json';
@@ -2220,7 +2121,7 @@ function importData(e){
       if(d.ALLOGGI_CONSIGLIATI) localStorage.setItem('madonie_alloggi_consigliati', JSON.stringify(d.ALLOGGI_CONSIGLIATI));
       if(d.ITINERARI_CUSTOM) localStorage.setItem('madonie_itin', JSON.stringify(d.ITINERARI_CUSTOM));
       if(d.VALUTAZIONI) localStorage.setItem('madonie_valutazioni', JSON.stringify(d.VALUTAZIONI));
-      if(d.CHECKINS) localStorage.setItem('madonie_checkins', JSON.stringify(d.CHECKINS)); // FIX: import CHECKINS
+      if(d.CHECKINS) localStorage.setItem('madonie_checkins', JSON.stringify(d.CHECKINS));
       showToast("Dati importati! Ricarico l'app...");
       setTimeout(()=>location.reload(), 1500);
     }catch(err){ showToast("Errore nel formato del file"); }
@@ -2248,7 +2149,7 @@ function locateUser(){
     const{latitude:lat,longitude:lon}=pos.coords;
     L.marker([lat,lon],{icon:L.divIcon({className:'',html:`<div style="width:16px;height:16px;background:#e74c3c;border:3px solid #fff;border-radius:50%;box-shadow:0 2px 8px rgba(231,76,60,.5)"></div>`,iconSize:[16,16],iconAnchor:[8,8]})})
       .addTo(map).bindPopup('📍 La tua posizione').openPopup();
-    map.setView([lat, lon], 12); // FIX: Usa le coordinate reali dell'utente invece di 37.90,14.05
+    map.setView([lat, lon], 12);
   },()=>showToast('Posizione non disponibile'));
 }
 
@@ -2257,8 +2158,6 @@ function setValutazione(nome, val) {
   else VALUTAZIONI[nome] = val;
   localStorage.setItem('madonie_valutazioni', JSON.stringify(VALUTAZIONI));
   renderRatingBtns(document.getElementById('info-rating'), nome);
-  // FIX: usa la variabile globale del tab se la dichiariamo, altrimenti aggiorna quello corretto. 
-  // Per sicurezza forziamo il refresh solo se il nome è in LUOGHI.
   if (document.getElementById('panel-luoghi').classList.contains('active')) renderLuoghi();
 }
 function renderRatingBtns(el, nome) {
@@ -2272,7 +2171,74 @@ function renderRatingBtns(el, nome) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// INTEGRAZIONE AI (GEMINI)
+// GAMIFICATION E PASSAPORTO
+// ═══════════════════════════════════════════════════════════
+function eseguiCheckIn(nome, coordsArray) {
+  if (!navigator.geolocation) { showToast('Il tuo dispositivo non supporta il GPS per il check-in.'); return; }
+  
+  const btn = document.getElementById('btn-checkin');
+  if(btn) { btn.innerHTML = '<span class="spinner" style="border-top-color:#fff"></span> Verifica...'; btn.disabled = true; }
+
+  navigator.geolocation.getCurrentPosition(pos => {
+    const userLat = pos.coords.latitude;
+    const userLng = pos.coords.longitude;
+    
+    const poiLat = Array.isArray(coordsArray[0]) ? coordsArray[0][0] : coordsArray[0];
+    const poiLng = Array.isArray(coordsArray[0]) ? coordsArray[0][1] : coordsArray[1];
+
+    const dist = map.distance([userLat, userLng], [poiLat, poiLng]);
+
+    if (dist <= 300) {
+      if(!CHECKINS.includes(nome)) {
+        CHECKINS.push(nome);
+        localStorage.setItem('madonie_checkins', JSON.stringify(CHECKINS));
+      }
+      showToast(`🎉 Check-in effettuato a ${nome}!`);
+      if(btn) { btn.innerHTML = '✅ Visitato'; }
+    } else {
+      showToast(`Sei a ${Math.round(dist/1000)} km di distanza! Avvicinati a meno di 300m per fare check-in.`);
+      if(btn) { btn.innerHTML = '📍 Fai Check-in'; btn.disabled = false; }
+    }
+  }, () => {
+    showToast('Errore GPS. Impossibile verificare la posizione. Attiva il GPS.');
+    if(btn) { btn.innerHTML = '📍 Fai Check-in'; btn.disabled = false; }
+  }, { enableHighAccuracy: true, timeout: 10000 });
+}
+
+function mostraPassaporto() {
+  const list = document.getElementById('passaporto-list');
+  list.innerHTML = '';
+  document.getElementById('passaporto-count').textContent = CHECKINS.length;
+
+  if(CHECKINS.length === 0) {
+    list.innerHTML = '<li>🌱 Nessun luogo ancora visitato. Vai in un luogo e usa il GPS!</li>';
+  } else {
+    CHECKINS.forEach(nome => {
+      list.innerHTML += `<li style="padding:8px 0; border-bottom:1px solid var(--border);">✅ <b>${nome}</b></li>`;
+    });
+  }
+
+  const badgesEl = document.getElementById('passaporto-badges');
+  const traguardi = [
+    { count: 1, name: "Esploratore Novizio", icon: "🌱" },
+    { count: 3, name: "Viaggiatore Seriale", icon: "🧭" },
+    { count: 5, name: "Guida delle Madonie", icon: "🦅" },
+    { count: 10, name: "Leggenda Locale", icon: "👑" }
+  ];
+
+  badgesEl.innerHTML = traguardi.map(t => {
+    if (CHECKINS.length >= t.count) {
+      return `<span class="badge-unlocked" title="Sbloccato con ${t.count} visite">${t.icon} ${t.name}</span>`;
+    } else {
+      return `<span class="badge-locked" title="Richiede ${t.count} visite">🔒 ${t.count} visite</span>`;
+    }
+  }).join('');
+
+  document.getElementById('passaporto-modal').classList.add('open');
+}
+
+// ═══════════════════════════════════════════════════════════
+// INTEGRAZIONE AI (GEMINI) E AUDIO
 // ═══════════════════════════════════════════════════════════
 function toggleChat() { document.getElementById('chat-panel').classList.toggle('open'); }
 
@@ -2360,6 +2326,67 @@ async function inviaMessaggioAI() {
   msgBox.scrollTop = msgBox.scrollHeight;
 }
 
+function avviaAscolto() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) { showToast("Il tuo browser non supporta il riconoscimento vocale."); return; }
+  const recognition = new SpeechRecognition();
+  recognition.lang = 'it-IT';
+  recognition.onstart = () => showToast("🎙️ In ascolto...");
+  recognition.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    document.getElementById('chat-input').value = transcript;
+    inviaMessaggioAI();
+  };
+  recognition.onerror = () => showToast("Errore con il microfono.");
+  recognition.start();
+}
+
+function leggiAdAltaVoce(testo) {
+  if(!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(testo);
+  u.lang = 'it-IT';
+  u.rate = 0.95;
+  window.speechSynthesis.speak(u);
+}
+
+async function generaEAscolta(nome, tipo, desc) {
+  const btn = document.getElementById('btn-audioguida');
+  if(btn) { btn.innerHTML = "⏳ Genero..."; btn.disabled = true; }
+  try {
+     const prompt = `Sei una guida turistica delle Madonie. Scrivi un racconto evocativo e appassionante di massimo 3 frasi sul luogo "${nome}". Nessuna formattazione speciale.`;
+     const text = await fetchGeminiWithRetry({ contents: [{ parts: [{ text: prompt }] }] }, false);
+     if(btn) { btn.innerHTML = "🔊 Riproduzione..."; btn.disabled = false; }
+     leggiAdAltaVoce(text.replace(/\*/g, ''));
+     showToast("Audioguida avviata");
+  } catch (e) {
+     if(btn) { btn.innerHTML = "🎧 Ascolta (AI)"; btn.disabled = false; }
+     showToast("Errore di rete per l'audioguida");
+  }
+}
+
+async function fetchElevationProfile(coordsArray, el) {
+   el.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-top-color:var(--sage)"></span> Calcolo altimetria in corso...';
+   try {
+     const start = Array.isArray(coordsArray[0]) ? coordsArray[0] : coordsArray;
+     const end = Array.isArray(coordsArray[coordsArray.length - 1]) ? coordsArray[coordsArray.length - 1] : coordsArray;
+     if(!start[0] || !end[0]) { el.style.display='none'; return; }
+     
+     const url = `https://api.open-meteo.com/v1/elevation?latitude=${start[0]},${end[0]}&longitude=${start[1]},${end[1]}`;
+     const res = await fetch(url);
+     const data = await res.json();
+     
+     if(data.elevation && data.elevation.length >= 2) {
+        const e1 = Math.round(data.elevation[0]); 
+        const e2 = Math.round(data.elevation[data.elevation.length - 1]);
+        const diff = e2 - e1;
+        el.innerHTML = `🏔️ <b>Altimetria stimata</b><br>Quota partenza: <b>${e1}m</b> | Quota arrivo: <b>${e2}m</b> <br>📈 Dislivello del tracciato: <b>${diff > 0 ? '+' : ''}${diff}m</b>`;
+     } else {
+        el.innerHTML = "Dati altimetrici non disponibili per questa zona.";
+     }
+   } catch(e) { el.style.display = 'none'; }
+}
+
 async function generaItinerarioAI() {
   const promptEl = document.getElementById('itin-ai-prompt');
   const input = promptEl.value.trim();
@@ -2445,10 +2472,10 @@ async function chiediConsiglioMeteoAI() {
   const msgBox = document.getElementById('chat-messages');
   msgBox.innerHTML += `<div class="chat-bubble user">Cosa mi consigli di fare oggi in base al meteo?</div>`;
   msgBox.scrollTop = msgBox.scrollHeight;
-  if (!navigator.geolocation) { elaboraConsiglioMeteo(41.88, 16.18, "Castelbuono (posizione predefinita)"); return; }
+  if (!navigator.geolocation) { elaboraConsiglioMeteo(37.9315, 14.0894, "Castelbuono (posizione predefinita)"); return; }
   navigator.geolocation.getCurrentPosition(
     (pos) => elaboraConsiglioMeteo(pos.coords.latitude, pos.coords.longitude, "la tua posizione attuale"),
-    () => elaboraConsiglioMeteo(41.88, 16.18, "Castelbuono (posizione predefinita)")
+    () => elaboraConsiglioMeteo(37.9315, 14.0894, "Castelbuono (posizione predefinita)")
   );
 }
 
@@ -2495,147 +2522,9 @@ async function chiediSommelierAI(nome, loc, cucina) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// NUOVE FUNZIONI AI E ALTIMETRIA
-// ═══════════════════════════════════════════════════════════
-
-function avviaAscolto() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) { showToast("Il tuo browser non supporta il riconoscimento vocale."); return; }
-  const recognition = new SpeechRecognition();
-  recognition.lang = 'it-IT';
-  recognition.onstart = () => showToast("🎙️ In ascolto...");
-  recognition.onresult = (e) => {
-    const transcript = e.results[0][0].transcript;
-    document.getElementById('chat-input').value = transcript;
-    inviaMessaggioAI();
-  };
-  recognition.onerror = () => showToast("Errore con il microfono.");
-  recognition.start();
-}
-
-function leggiAdAltaVoce(testo) {
-  if(!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(testo);
-  u.lang = 'it-IT';
-  u.rate = 0.95; // Velocità leggermente ridotta per renderla più naturale
-  window.speechSynthesis.speak(u);
-}
-
-async function generaEAscolta(nome, tipo, desc) {
-  const btn = document.getElementById('btn-audioguida');
-  if(btn) { btn.innerHTML = "⏳ Genero..."; btn.disabled = true; }
-  try {
-     const prompt = `Sei una guida turistica delle Madonie. Scrivi un racconto evocativo e appassionante di massimo 3 frasi sul luogo "${nome}". Nessuna formattazione speciale.`;
-     const text = await fetchGeminiWithRetry({ contents: [{ parts: [{ text: prompt }] }] }, false);
-     if(btn) { btn.innerHTML = "🔊 Riproduzione..."; btn.disabled = false; }
-     leggiAdAltaVoce(text.replace(/\*/g, ''));
-     showToast("Audioguida avviata");
-  } catch (e) {
-     if(btn) { btn.innerHTML = "🎧 Ascolta (AI)"; btn.disabled = false; }
-     showToast("Errore di rete per l'audioguida");
-  }
-}
-
-async function fetchElevationProfile(coordsArray, el) {
-   el.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-top-color:var(--sage)"></span> Calcolo altimetria in corso...';
-   try {
-     // Estrapola il primo e l'ultimo punto dalle coordinate del sentiero
-     const start = Array.isArray(coordsArray[0]) ? coordsArray[0] : coordsArray;
-     const end = Array.isArray(coordsArray[coordsArray.length - 1]) ? coordsArray[coordsArray.length - 1] : coordsArray;
-     if(!start[0] || !end[0]) { el.style.display='none'; return; }
-     
-     // Richiesta gratuita a Open-Meteo Elevation API
-     const url = `https://api.open-meteo.com/v1/elevation?latitude=${start[0]},${end[0]}&longitude=${start[1]},${end[1]}`;
-     const res = await fetch(url);
-     const data = await res.json();
-     
-     if(data.elevation && data.elevation.length >= 2) {
-        const e1 = Math.round(data.elevation[0]); 
-        const e2 = Math.round(data.elevation[data.elevation.length - 1]);
-        const diff = e2 - e1;
-        el.innerHTML = `🏔️ <b>Altimetria stimata</b><br>Quota partenza: <b>${e1}m</b> | Quota arrivo: <b>${e2}m</b> <br>📈 Dislivello del tracciato: <b>${diff > 0 ? '+' : ''}${diff}m</b>`;
-     } else {
-        el.innerHTML = "Dati altimetrici non disponibili per questa zona.";
-     }
-   } catch(e) { el.style.display = 'none'; }
-}
-
-// ═══════════════════════════════════════════════════════════
-// NUOVA FUNZIONE: GAMIFICATION E PASSAPORTO
-// ═══════════════════════════════════════════════════════════
-
-function eseguiCheckIn(nome, coordsArray) {
-  if (!navigator.geolocation) { showToast('Il tuo dispositivo non supporta il GPS per il check-in.'); return; }
-  
-  const btn = document.getElementById('btn-checkin');
-  if(btn) { btn.innerHTML = '<span class="spinner" style="border-top-color:#fff"></span> Verifica...'; btn.disabled = true; }
-
-  navigator.geolocation.getCurrentPosition(pos => {
-    const userLat = pos.coords.latitude;
-    const userLng = pos.coords.longitude;
-    
-    // Gestisce il formato coordinate (può essere un array semplice o array di array per i percorsi)
-    const poiLat = Array.isArray(coordsArray[0]) ? coordsArray[0][0] : coordsArray[0];
-    const poiLng = Array.isArray(coordsArray[0]) ? coordsArray[0][1] : coordsArray[1];
-
-    // Calcolo distanza usando la libreria della mappa già presente (Leaflet)
-    const dist = map.distance([userLat, userLng], [poiLat, poiLng]);
-
-    if (dist <= 300) { // Tolleranza 300 metri
-      if(!CHECKINS.includes(nome)) {
-        CHECKINS.push(nome);
-        localStorage.setItem('madonie_checkins', JSON.stringify(CHECKINS));
-      }
-      showToast(`🎉 Check-in effettuato a ${nome}!`);
-      if(btn) { btn.innerHTML = '✅ Visitato'; }
-    } else {
-      showToast(`Sei a ${Math.round(dist/1000)} km di distanza! Avvicinati a meno di 300m per fare check-in.`);
-      if(btn) { btn.innerHTML = '📍 Fai Check-in'; btn.disabled = false; }
-    }
-  }, () => {
-    showToast('Errore GPS. Impossibile verificare la posizione. Attiva il GPS.');
-    if(btn) { btn.innerHTML = '📍 Fai Check-in'; btn.disabled = false; }
-  }, { enableHighAccuracy: true, timeout: 10000 });
-}
-
-function mostraPassaporto() {
-  const list = document.getElementById('passaporto-list');
-  list.innerHTML = '';
-  document.getElementById('passaporto-count').textContent = CHECKINS.length;
-
-  if(CHECKINS.length === 0) {
-    list.innerHTML = '<li>🌱 Nessun luogo ancora visitato. Vai in un luogo e usa il GPS!</li>';
-  } else {
-    CHECKINS.forEach(nome => {
-      list.innerHTML += `<li style="padding:8px 0; border-bottom:1px solid var(--border);">✅ <b>${nome}</b></li>`;
-    });
-  }
-
-  const badgesEl = document.getElementById('passaporto-badges');
-  const traguardi = [
-    { count: 1, name: "Esploratore Novizio", icon: "🌱" },
-    { count: 3, name: "Viaggiatore Seriale", icon: "🧭" },
-    { count: 5, name: "Guida delle Madonie", icon: "🦅" },
-    { count: 10, name: "Leggenda Locale", icon: "👑" }
-  ];
-
-  badgesEl.innerHTML = traguardi.map(t => {
-    if (CHECKINS.length >= t.count) {
-      return `<span class="badge-unlocked" title="Sbloccato con ${t.count} visite">${t.icon} ${t.name}</span>`;
-    } else {
-      return `<span class="badge-locked" title="Richiede ${t.count} visite">🔒 ${t.count} visite</span>`;
-    }
-  }).join('');
-
-  document.getElementById('passaporto-modal').classList.add('open');
-}
-
-// ═══════════════════════════════════════════════════════════
 // INIT MAPPA E APP
 // ═══════════════════════════════════════════════════════════
 window.onload = function() {
-  // FIX: Aggiunti Layer satellitari multipli perfetti per il trekking
   const osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '© OSM' });
   const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19, attribution: 'Tiles © Esri' });
   
@@ -2643,13 +2532,11 @@ window.onload = function() {
     layers: [osmLayer]
   }).setView([37.90,14.05], 10);
 
-  // Aggiunto controllo per switch mappa
   L.control.layers({
     "🗺 Mappa Base": osmLayer,
     "🛰 Satellite (Esri)": satelliteLayer
   }).addTo(map);
 
-  // Renderizza tutti i tab invisibilmente per popolare le liste, poi va su 'luoghi' e disegna la mappa master
   renderTrek();
   renderRest();
   renderAlloggi();
@@ -2669,7 +2556,7 @@ window.addEventListener('load', ()=>{
     let all = [];
     try{ if(typeof LUOGHI !== 'undefined') all.push(...LUOGHI); }catch(e){}
     try{ if(typeof RISTORANTI !== 'undefined') all.push(...RISTORANTI); }catch(e){}
-    try{ if(typeof SENTIERI !== 'undefined') all.push(...SENTIERI); }catch(e){} // FIX: Era TREKKING, corretto a SENTIERI
+    try{ if(typeof SENTIERI !== 'undefined') all.push(...SENTIERI); }catch(e){}
     try{ if(typeof ALLOGGI_DEFAULT !== 'undefined') all.push(...ALLOGGI_DEFAULT); }catch(e){}
 
     return all.find(p => p.name && p.name.trim() === name.trim());
