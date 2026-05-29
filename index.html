@@ -16,51 +16,6 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
 <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
 
-<script>
-// FIX: Rimossa la funzione obsoleta removeItem(tipo, index) che causava bug di eliminazione errata.
-
-let ACTIVE_MARKER = null;
-
-function clearSelectedCards(){
-  document.querySelectorAll('.selected-card').forEach(el=>{
-    el.classList.remove('selected-card');
-  });
-}
-
-function focusPOI(coords,title,cardEl){
-  clearSelectedCards();
-  if(cardEl){
-    cardEl.classList.add('selected-card');
-  }
-  if(ACTIVE_MARKER){
-    map.removeLayer(ACTIVE_MARKER);
-  }
-
-  const premiumIcon = L.divIcon({
-    className:'',
-    html:'<div class="poi-premium"></div>',
-    iconSize:[42,42],
-    iconAnchor:[21,21]
-  });
-
-  ACTIVE_MARKER = L.marker(coords,{icon:premiumIcon}).addTo(map);
-
-  ACTIVE_MARKER.bindPopup(`
-    <div style="font-weight:700;font-size:14px">${title}</div>
-    <div style="font-size:12px;color:#666">POI selezionato</div>
-  `).openPopup();
-
-  map.flyTo(coords,15,{
-    duration:1.6
-  });
-}
-
-function fitAllPremium(){
-  const group = new L.featureGroup(allMarkers);
-  map.fitBounds(group.getBounds().pad(0.2));
-}
-</script>
-
 <style>
 :root{
   --forest:#0d4f6e; --sage:#1a7a9e; --gold:#e8a020; --cream:#f4f8fb;
@@ -214,17 +169,6 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);c
 .leaflet-popup-content b{color:var(--forest);font-size:14px}
 .leaflet-control-layers { border-radius: 8px !important; border: 1px solid var(--border) !important; font-family: 'DM Sans', sans-serif !important; }
 
-/* Animazione Marker */
-@keyframes markerPulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(232, 160, 32, 0.7); }
-  50% { transform: scale(1.3); box-shadow: 0 0 0 15px rgba(232, 160, 32, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(232, 160, 32, 0); }
-}
-.marker-active-pulse {
-  animation: markerPulse 0.6s ease-out 4;
-  z-index: 1000 !important;
-}
-
 /* Stile personalizzato cluster */
 .marker-cluster-custom {
   background-clip: padding-box;
@@ -293,7 +237,6 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);c
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* ── MODALS AGGIUNTA / PASSAPORTO / SETTINGS ── */
-/* FIX: Alzato lo z-index da 2000 a 10000 per evitare sovrapposizioni con la chat AI */
 .modal-overlay{
   display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:10000;
   align-items:center;justify-content:center;
@@ -895,7 +838,7 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
       </div>
       <div class="form-row" style="flex:1;margin-bottom:0">
         <label>Cucina</label>
-        <input type="text" id="rist-cucina" placeholder="Es. Emiliana"/>
+        <input type="text" id="rist-cucina" placeholder="Es. Siciliana"/>
       </div>
     </div>
     <div class="form-row" style="margin-top:10px">
@@ -912,7 +855,10 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
         <input type="number" id="rist-lng" placeholder="Es. 14.0894" step="0.0001"/>
       </div>
     </div>
-    <button class="btn btn-outline" onclick="usaGPS('rist')" style="font-size:12px;width:100%;margin:10px 0">🗺 Cattura Coordinate da Mappa</button>
+    <div style="display:flex;gap:8px;margin:10px 0">
+      <button type="button" class="btn btn-outline" onclick="usaGPS('rist')" style="flex:1;font-size:12px;padding:8px 4px">📍 Usa Posizione (GPS)</button>
+      <button type="button" class="btn btn-outline" onclick="scegliDaMappa('rist', 'ristorante-modal')" style="flex:1;font-size:12px;padding:8px 4px">🗺 Clicca su Mappa</button>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('ristorante-modal')">Annulla</button>
       <button class="btn btn-gold" onclick="salvaRistorante()">Salva ristorante</button>
@@ -928,7 +874,7 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
     </p>
     <div class="form-row">
       <label>Nome sentiero *</label>
-      <input type="text" id="trek-nome" placeholder="Es. Anello del Cimone"/>
+      <input type="text" id="trek-nome" placeholder="Es. Anello di Pizzo Carbonara"/>
     </div>
     <div style="display:flex;gap:8px">
       <div class="form-row" style="flex:1;margin-bottom:0">
@@ -952,7 +898,7 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
       </div>
       <div class="form-row" style="flex:1;margin-bottom:0">
         <label>Punto di partenza</label>
-        <input type="text" id="trek-start" placeholder="Es. Sestola"/>
+        <input type="text" id="trek-start" placeholder="Es. Piano Battaglia"/>
       </div>
     </div>
     <div class="form-row">
@@ -973,7 +919,10 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
         <input type="number" id="trek-lng" placeholder="Es. 14.0894" step="0.0001"/>
       </div>
     </div>
-    <button class="btn btn-outline" onclick="usaGPS('trek')" style="font-size:12px;width:100%;margin:10px 0">🗺 Cattura Coordinate da Mappa</button>
+    <div style="display:flex;gap:8px;margin:10px 0">
+      <button type="button" class="btn btn-outline" onclick="usaGPS('trek')" style="flex:1;font-size:12px;padding:8px 4px">📍 Usa Posizione (GPS)</button>
+      <button type="button" class="btn btn-outline" onclick="scegliDaMappa('trek', 'sentiero-modal')" style="flex:1;font-size:12px;padding:8px 4px">🗺 Clicca su Mappa</button>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('sentiero-modal')">Annulla</button>
       <button class="btn btn-gold" onclick="salvaSentiero()">Salva sentiero</button>
@@ -986,7 +935,7 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
     <h2>📍 Aggiungi luogo</h2>
     <div class="form-row">
       <label>Nome *</label>
-      <input type="text" id="luogo-nome" placeholder="Es. Abbazia di Nonantola"/>
+      <input type="text" id="luogo-nome" placeholder="Es. Santuario di Gibilmanna"/>
     </div>
     <div class="form-row">
       <label>Categoria *</label>
@@ -1017,7 +966,10 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
         <input type="number" id="luogo-lng" placeholder="Es. 14.0894" step="0.0001"/>
       </div>
     </div>
-    <button class="btn btn-outline" onclick="usaGPS('luogo')" style="font-size:12px;width:100%;margin:10px 0">🗺 Cattura Coordinate da Mappa</button>
+    <div style="display:flex;gap:8px;margin:10px 0">
+      <button type="button" class="btn btn-outline" onclick="usaGPS('luogo')" style="flex:1;font-size:12px;padding:8px 4px">📍 Usa Posizione (GPS)</button>
+      <button type="button" class="btn btn-outline" onclick="scegliDaMappa('luogo', 'luogo-modal')" style="flex:1;font-size:12px;padding:8px 4px">🗺 Clicca su Mappa</button>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('luogo-modal')">Annulla</button>
       <button class="btn btn-gold" onclick="salvaLuogo()">Salva luogo</button>
@@ -1030,7 +982,7 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
     <h2>🏨 Aggiungi alloggio consigliato</h2>
     <div class="form-row">
       <label>Nome alloggio *</label>
-      <input type="text" id="alloggio-nome" placeholder="Es. B&B Pizzomunno Vista Mare"/>
+      <input type="text" id="alloggio-nome" placeholder="Es. B&B Madonie Vista"/>
     </div>
     <div style="display:flex;gap:8px">
       <div class="form-row" style="flex:1;margin-bottom:0">
@@ -1074,7 +1026,10 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
         <input type="number" id="alloggio-lng" placeholder="Es. 14.0894" step="0.0001"/>
       </div>
     </div>
-    <button class="btn btn-outline" onclick="usaGPS('alloggio')" style="font-size:12px;width:100%;margin:10px 0">🗺 Cattura Coordinate da Mappa</button>
+    <div style="display:flex;gap:8px;margin:10px 0">
+      <button type="button" class="btn btn-outline" onclick="usaGPS('alloggio')" style="flex:1;font-size:12px;padding:8px 4px">📍 Usa Posizione (GPS)</button>
+      <button type="button" class="btn btn-outline" onclick="scegliDaMappa('alloggio', 'alloggio-modal')" style="flex:1;font-size:12px;padding:8px 4px">🗺 Clicca su Mappa</button>
+    </div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="closeModal('alloggio-modal')">Annulla</button>
       <button class="btn btn-gold" onclick="salvaAlloggio()">Salva alloggio</button>
@@ -1156,7 +1111,6 @@ function openAlloggioModal() {
   document.getElementById('alloggio-modal').classList.add('open');
 }
 
-// NUOVE FUNZIONI IMPOSTAZIONI E RESET
 function apriImpostazioni() {
   document.getElementById('settings-modal').classList.add('open');
 }
@@ -1197,7 +1151,6 @@ const LUOGHI = [
 {name:"Castello dei Ventimiglia",cat:"cultura",coords:[37.9322,14.0888],desc:"Castello simbolo di Castelbuono.",pop:true}
 ];
 
-// FIX: Ripuliti interamente i sentieri per rimuovere le contaminazioni del Gargano
 const SENTIERI = [
 {name:"Sentiero Agrifogli Giganti di Piano Pomo",diff:"F",km:4,h:"2h",start:"Piano Sempria",coords:[[37.8931,14.0722],[37.8850,14.0800]],url:"https://it.wikiloc.com",desc:"Passeggiata magica tra alberi monumentali unici al mondo."},
 {name:"Sentiero Geologico Rocca di Sciara",diff:"M",km:6,h:"3h",start:"Polizzi Generosa",coords:[[37.8117,14.0034],[37.8200,14.0100]],url:"https://www.madonie.it",desc:"Percorso geologico con vista spettacolare sulle valli."},
@@ -1234,7 +1187,6 @@ const ALLOGGI_DEFAULT = [
 {name:"Hotel Ypsigro Palace",coords:[37.9318,14.0895],tipo:"hotel",prezzo:140,stelle:4,voto:"8.9 ⭐",loc:"Castelbuono",url:"https://www.ypsigropalace.it",desc:"Hotel nel centro storico."}
 ];
 
-// FIX: Ripuliti gli itinerari da contaminazioni estranee
 const ITINERARI_PREDEFINITI = [
 {name:"Castelbuono e i sapori antichi",tema:"storico",giorni:1,desc:"La cittadina simbolo delle Madonie: centro storico medievale, il Castello dei Ventimiglia e la degustazione di Manna.",tappe:["Castelbuono","Castello dei Ventimiglia","Fiasconaro Bistrot","Agriturismo Bergi"],km:5,coords:[[37.9315,14.0894],[37.9322,14.0888],[37.9312,14.0885],[37.9250,14.0800]]},
 {name:"Tra Borghi e Natura",tema:"natura",giorni:2,desc:"Due giorni nel cuore verde delle Madonie: foreste secolari, fauna e borghi antichi.",tappe:["Petralia Sottana","Piano Battaglia","Polizzi Generosa","Petralia Soprana"],km:45,coords:[[37.8080,14.0920],[37.8728,14.0165],[37.8117,14.0034],[37.8097,14.1084]]},
@@ -1273,6 +1225,7 @@ let allMarkers = [];
 let routeLine = null;
 let currentRouteCoords = [];
 let currentRouteNames = [];
+let premiumMarker = null;
 
 const CAT_COLORS = {
   borgo:'#0d4f6e', cultura:'#2e9ec9', natura:'#27ae60', trekking:'#1565c0',
@@ -1309,7 +1262,34 @@ function clearMapMarkers(){
     allMarkers.forEach(m => map.removeLayer(m));
   }
   allMarkers = [];
-  document.querySelectorAll('.marker-icon-custom div').forEach(el => el.classList.remove('marker-active-pulse'));
+}
+
+// ── Funzione Unificata Gestione Click Card / Marker ──
+function handleCardClick(name, type, coords) {
+  showInfoByName(name, type);
+  
+  // Rimuovi focus da altre card
+  document.querySelectorAll('.selected-card').forEach(c => c.classList.remove('selected-card'));
+  
+  // Aggiungi focus alla card corretta
+  const cards = document.querySelectorAll(`.list-card[data-name="${name.replace(/"/g, '\\"')}"]`);
+  cards.forEach(c => c.classList.add('selected-card'));
+
+  // Gestione Marker Premium
+  const pt = Array.isArray(coords[0]) ? coords[0] : coords;
+  map.flyTo(pt, 15, {duration: 1.5});
+
+  if(premiumMarker) map.removeLayer(premiumMarker);
+
+  const icon = L.divIcon({
+    className:'',
+    html:'<div class="poi-premium"></div>',
+    iconSize:[42,42],
+    iconAnchor:[21,21]
+  });
+
+  premiumMarker = L.marker(pt, {icon}).addTo(map);
+  premiumMarker.bindPopup('<b>'+name+'</b>').openPopup();
 }
 
 function updateMap() {
@@ -1334,10 +1314,7 @@ function updateMap() {
     const txtOK = !qL || (p.name+p.desc+p.cat).toLowerCase().includes(qL);
     if(catOK && txtOK && p.coords) {
       const m = L.marker(p.coords, {icon: makeIcon(p.cat)});
-      m.on('click', (e) => { 
-        triggerMarkerPulse(e.target); map.setView(p.coords, 16); 
-        showInfoByName(p.name, 'luogo'); 
-      });
+      m.on('click', () => handleCardClick(p.name, 'luogo', p.coords));
       markerClusterGroup.addLayer(m);
       allMarkers.push(m);
       visibleCount++;
@@ -1352,10 +1329,7 @@ function updateMap() {
     if(dOK && tOK && visOK && s.coords && s.coords.length > 0) {
       const startPt = s.coords[0];
       const m = L.marker(startPt, {icon: makeIcon('trekking')});
-      m.on('click', (e) => { 
-        triggerMarkerPulse(e.target); map.setView(startPt, 16); 
-        showInfoByName(s.name, 'trekking'); 
-      });
+      m.on('click', () => handleCardClick(s.name, 'trekking', s.coords));
       markerClusterGroup.addLayer(m);
       allMarkers.push(m);
       visibleCount++;
@@ -1371,10 +1345,7 @@ function updateMap() {
     const tOK = !qR || (r.name+r.desc+r.cucina+r.loc).toLowerCase().includes(qR);
     if(pOK && cityOK && tOK && r.coords) {
       const m = L.marker(r.coords, {icon: makeIcon(r.cat)});
-      m.on('click', (e) => { 
-        triggerMarkerPulse(e.target); map.setView(r.coords, 16); 
-        showInfoByName(r.name, 'ristorante'); 
-      });
+      m.on('click', () => handleCardClick(r.name, 'ristorante', r.coords));
       markerClusterGroup.addLayer(m);
       allMarkers.push(m);
       visibleCount++;
@@ -1395,10 +1366,7 @@ function updateMap() {
         html:`<div style="background:${col};color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.3);cursor:pointer;transition:all 0.3s">${ic}</div>`,
         iconSize:[28,28], iconAnchor:[14,14]});
       const m = L.marker(a.coords, {icon});
-      m.on('click', (e) => { 
-        triggerMarkerPulse(e.target); map.setView(a.coords, 16); 
-        showInfoByName(a.name, 'alloggio'); 
-      });
+      m.on('click', () => handleCardClick(a.name, 'alloggio', a.coords));
       markerClusterGroup.addLayer(m);
       allMarkers.push(m);
       visibleCount++;
@@ -1406,18 +1374,6 @@ function updateMap() {
   });
 
   document.getElementById('stat-visible').textContent = visibleCount;
-}
-
-function triggerMarkerPulse(markerTarget) {
-  document.querySelectorAll('.marker-icon-custom div').forEach(el => el.classList.remove('marker-active-pulse'));
-  if (markerTarget && markerTarget._icon) {
-    const innerDiv = markerTarget._icon.querySelector('div');
-    if (innerDiv) {
-      innerDiv.classList.remove('marker-active-pulse');
-      void innerDiv.offsetWidth; 
-      innerDiv.classList.add('marker-active-pulse');
-    }
-  }
 }
 
 function getFasciaAlloggio(p) {
@@ -1491,7 +1447,7 @@ function showInfoByName(name, type) {
     meteoEl.innerHTML = '<span style="opacity:.6">⏳ Meteo in carico…</span>';
     fetchMeteo(lat, lon, meteoEl);
     
-    btnGoogle.href = `https://www.google.com/maps/dir/?api=1&destination=$${lat},${lon}`;
+    btnGoogle.href = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}`;
     btnGoogle.style.display = 'inline-block';
   } else {
     meteoEl.innerHTML = '';
@@ -1700,6 +1656,7 @@ function renderLuoghi(){
   filtered.forEach(p => {
     const d = document.createElement('div');
     d.className = 'list-card';
+    d.dataset.name = p.name;
     const rv = VALUTAZIONI[p.name] || '';
     d.innerHTML = `<h3>${p.name}
       ${p.pop?'<span class="badge" style="background:#fff3cd;color:#856404;margin-left:5px">⭐ Pop</span>':''}
@@ -1712,7 +1669,7 @@ function renderLuoghi(){
       <button data-n="${p.name}" onclick="event.stopPropagation(); showInfoByName(this.dataset.n, 'luogo')" style="font-size:11px;background:var(--sky);color:#fff;border:none;border-radius:6px;padding:3px 10px;cursor:pointer;font-weight:600">🔍 Dettagli</button>
       <button data-n="${p.name}" onclick="event.stopPropagation(); eliminaLuogoCustom(this.dataset.n)" style="font-size:11px;background:#c62828;color:#fff;border:none;border-radius:6px;padding:3px 8px;cursor:pointer;font-weight:600">🗑 Rimuovi</button>
     </div>`;
-    d.onclick = () => { map.setView(p.coords, 16); showInfoByName(p.name, 'luogo'); };
+    d.onclick = () => handleCardClick(p.name, 'luogo', p.coords);
     list.appendChild(d);
   });
 }
@@ -1765,6 +1722,7 @@ function renderTrek(){
   filtered.forEach(s => {
     const d = document.createElement('div');
     d.className = 'list-card';
+    d.dataset.name = s.name;
     d.innerHTML = `<h3>${s.name} ${s.custom ? '<span class="badge" style="background:#e8f0fe;color:#1565c0;margin-left:5px">✏️ Mio</span>' : ''}</h3>
       <div class="badge-row">
         <span class="badge diff-${s.diff}">${s.diff==='F'?'🟢 Facile':s.diff==='M'?'🟡 Medio':s.diff==='D'?'🔴 Difficile':'⚫ Esperto'}</span>
@@ -1778,7 +1736,7 @@ function renderTrek(){
           : `<button data-n="${s.name}" onclick="event.stopPropagation(); nascondiSentiero(this.dataset.n)" style="font-size:11px;background:transparent;border:1px solid #ddd;border-radius:6px;padding:3px 8px;cursor:pointer;color:var(--rust)">🗑 Rimuovi</button>`
         }
       </div>`;
-    d.onclick = () => { if(s.coords && s.coords.length > 0) map.setView(s.coords[0], 16); showInfoByName(s.name, 'trekking'); };
+    d.onclick = () => { if(s.coords && s.coords.length > 0) handleCardClick(s.name, 'trekking', s.coords); };
     list.appendChild(d);
   });
 }
@@ -1839,6 +1797,7 @@ function renderRest(){
   filtered.forEach(r => {
     const d = document.createElement('div');
     d.className = 'list-card';
+    d.dataset.name = r.name;
     d.innerHTML = `<h3>${r.name} ${r.custom ? '<span class="badge" style="background:#e8f0fe;color:#1565c0;margin-left:5px">✏️ Mio</span>' : ''}</h3>
       <div class="badge-row">
         <span class="badge cat-ristorante">${r.cat}</span>
@@ -1852,7 +1811,7 @@ function renderRest(){
           ? `<button data-n="${r.name}" onclick="event.stopPropagation(); eliminaRistoranteCustom(this.dataset.n)" style="font-size:11px;background:transparent;border:1px solid #ddd;border-radius:6px;padding:3px 8px;cursor:pointer;color:var(--rust)">🗑 Rimuovi</button>` 
           : `<button data-n="${r.name}" onclick="event.stopPropagation(); nascondiRistorante(this.dataset.n)" style="font-size:11px;background:transparent;border:1px solid #ddd;border-radius:6px;padding:3px 8px;cursor:pointer;color:var(--rust)">🗑 Rimuovi</button>`}
       </div>`;
-    d.onclick = () => { map.setView(r.coords, 16); showInfoByName(r.name, 'ristorante'); };
+    d.onclick = () => handleCardClick(r.name, 'ristorante', r.coords);
     list.appendChild(d);
   });
 }
@@ -1921,6 +1880,7 @@ function renderAlloggi(){
   filtered.forEach((a, idx) => {
     const d = document.createElement('div');
     d.className = 'list-card';
+    d.dataset.name = a.name;
     d.style.borderLeft = `4px solid ${TIPO_COLOR[a.tipo]||'#000'}`;
     d.innerHTML = `<h3>${a.name}</h3>
       <div class="badge-row">
@@ -1933,7 +1893,7 @@ function renderAlloggi(){
       <div style="display:flex;gap:6px;margin-top:7px;flex-wrap:wrap;justify-content:flex-end">
         <button data-n="${a.name}" onclick="event.stopPropagation(); eliminaAlloggioConsigliato(this.dataset.n)" style="font-size:11px;background:transparent;border:1px solid #ddd;border-radius:6px;padding:3px 8px;cursor:pointer;color:var(--rust)">🗑 Rimuovi</button>
       </div>`;
-    d.onclick = () => { map.setView(a.coords, 16); showInfoByName(a.name, 'alloggio'); };
+    d.onclick = () => handleCardClick(a.name, 'alloggio', a.coords);
     list.appendChild(d);
   });
 }
@@ -2130,7 +2090,7 @@ function importData(e){
 }
 
 // ═══════════════════════════════════════════════════════════
-// LOGICA CONDIVISA (GPS, VALUTAZIONI)
+// LOGICA CONDIVISA (GPS, MAPPA PICKER, VALUTAZIONI)
 // ═══════════════════════════════════════════════════════════
 function usaGPS(prefix) {
   if (!navigator.geolocation) { showToast('GPS non disponibile'); return; }
@@ -2138,8 +2098,42 @@ function usaGPS(prefix) {
   navigator.geolocation.getCurrentPosition(pos => {
     document.getElementById(`${prefix}-lat`).value = pos.coords.latitude.toFixed(6);
     document.getElementById(`${prefix}-lng`).value = pos.coords.longitude.toFixed(6);
-    showToast('Coordinate inserite ✅');
-  }, () => showToast('Posizione non disponibile'));
+    showToast('Coordinate GPS inserite ✅');
+  }, () => showToast('Posizione GPS non disponibile'));
+}
+
+// LOGICA SELEZIONE DA MAPPA
+let pickingMapPointFor = null;
+let pickingMapModalId = null;
+
+function scegliDaMappa(prefix, modalId) {
+  closeModal(modalId);
+  pickingMapPointFor = prefix;
+  pickingMapModalId = modalId;
+  showToast("👆 Clicca su un punto esatto della mappa");
+  document.getElementById('map-container').style.cursor = 'crosshair';
+  
+  if(window.innerWidth < 768) {
+    document.getElementById('sidebar').classList.remove('open');
+  }
+
+  map.off('click', mapClickHandler);
+  map.on('click', mapClickHandler);
+}
+
+function mapClickHandler(e) {
+  if (!pickingMapPointFor) return;
+
+  document.getElementById(pickingMapPointFor + '-lat').value = e.latlng.lat.toFixed(6);
+  document.getElementById(pickingMapPointFor + '-lng').value = e.latlng.lng.toFixed(6);
+
+  document.getElementById('map-container').style.cursor = '';
+  document.getElementById(pickingMapModalId).classList.add('open');
+  showToast("Coordinate acquisite dalla mappa! ✅");
+
+  pickingMapPointFor = null;
+  pickingMapModalId = null;
+  map.off('click', mapClickHandler);
 }
 
 function locateUser(){
@@ -2545,56 +2539,6 @@ window.onload = function() {
   
   switchTab('luoghi');
 };
-
-// ═══════════════════════════════════════════════════════════
-// PREMIUM MAP LISTENER
-// ═══════════════════════════════════════════════════════════
-window.addEventListener('load', ()=>{
-  let premiumMarker = null;
-
-  function getPOIByName(name){
-    let all = [];
-    try{ if(typeof LUOGHI !== 'undefined') all.push(...LUOGHI); }catch(e){}
-    try{ if(typeof RISTORANTI !== 'undefined') all.push(...RISTORANTI); }catch(e){}
-    try{ if(typeof SENTIERI !== 'undefined') all.push(...SENTIERI); }catch(e){}
-    try{ if(typeof ALLOGGI_DEFAULT !== 'undefined') all.push(...ALLOGGI_DEFAULT); }catch(e){}
-
-    return all.find(p => p.name && p.name.trim() === name.trim());
-  }
-
-  document.addEventListener('click', function(e){
-    const card = e.target.closest('.list-card');
-    if(!card) return;
-
-    document.querySelectorAll('.selected-card').forEach(c=>{
-      c.classList.remove('selected-card');
-    });
-    card.classList.add('selected-card');
-
-    const h3 = card.querySelector('h3');
-    if(!h3) return;
-
-    const poi = getPOIByName(h3.innerText);
-    if(!poi || !poi.coords || typeof map === 'undefined') return;
-
-    const coords = Array.isArray(poi.coords[0]) ? poi.coords[0] : poi.coords;
-    map.flyTo(coords, 15, {duration: 1.5});
-
-    if(premiumMarker){
-      map.removeLayer(premiumMarker);
-    }
-
-    const icon = L.divIcon({
-      className:'',
-      html:'<div class="poi-premium"></div>',
-      iconSize:[42,42],
-      iconAnchor:[21,21]
-    });
-
-    premiumMarker = L.marker(coords,{icon}).addTo(map);
-    premiumMarker.bindPopup('<b>'+poi.name+'</b>').openPopup();
-  });
-});
 </script>
 </body>
 </html>
