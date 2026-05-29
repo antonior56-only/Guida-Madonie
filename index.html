@@ -2308,7 +2308,7 @@ async function inviaMessaggioAI() {
 
   const payload = {
     contents: [{ parts: [{ text: txt }] }],
-    systemInstruction: { parts: [{ text: `Sei una guida turistica esperta del Madonie. Suggerisci luoghi basandoti ESCLUSIVAMENTE sui seguenti dati dell'app: ${getAppDati()}` }] }
+    systemInstruction: { parts: [{ text: `Sei una guida turistica esperta, loquace e appassionata delle Madonie. Le tue risposte devono essere sempre corpose, ampie e molto dettagliate. Fornisci descrizioni ricche, aneddoti e spiega bene i motivi dei tuoi suggerimenti. Suggerisci luoghi basandoti ESCLUSIVAMENTE sui seguenti dati dell'app: ${getAppDati()}` }] }
   };
 
   try {
@@ -2348,7 +2348,7 @@ async function generaEAscolta(nome, tipo, desc) {
   const btn = document.getElementById('btn-audioguida');
   if(btn) { btn.innerHTML = "⏳ Genero..."; btn.disabled = true; }
   try {
-     const prompt = `Sei una guida turistica delle Madonie. Scrivi un racconto evocativo e appassionante di massimo 3 frasi sul luogo "${nome}". Nessuna formattazione speciale.`;
+     const prompt = `Sei una guida turistica delle Madonie. Scrivi un racconto evocativo, molto dettagliato e appassionante sul luogo "${nome}". Includi curiosità e descrizioni dell'atmosfera. Nessuna formattazione speciale.`;
      const text = await fetchGeminiWithRetry({ contents: [{ parts: [{ text: prompt }] }] }, false);
      if(btn) { btn.innerHTML = "🔊 Riproduzione..."; btn.disabled = false; }
      leggiAdAltaVoce(text.replace(/\*/g, ''));
@@ -2445,7 +2445,7 @@ function analizzaFotoAI(event) {
     msgBox.scrollTop = msgBox.scrollHeight;
 
     const payload = {
-      contents: [{ role: "user", parts: [ { text: "Sei una guida turistica del Madonie. Identifica questo luogo, flora o cibo tipico e dimmi cos'è in 2-3 frasi." }, { inlineData: { mimeType: file.type, data: base64Data } }] }]
+      contents: [{ role: "user", parts: [ { text: "Sei una guida turistica del Madonie. Identifica questo luogo, flora o cibo tipico e fornisci una spiegazione estesa, ricca di dettagli, storia e curiosità." }, { inlineData: { mimeType: file.type, data: base64Data } }] }]
     };
 
     try {
@@ -2484,7 +2484,7 @@ async function elaboraConsiglioMeteo(lat, lon, locationName) {
     const r = await fetch(url); const d = await r.json();
     const meteoDesc = WMO[d.current.weathercode] || 'Meteo variabile';
     const temp = Math.round(d.current.temperature_2m);
-    const promptTesto = `Il meteo attuale a ${locationName} è: ${meteoDesc} con ${temp}°C. Suggerisci 2 attività basandoti ESCLUSIVAMENTE sull'app: ${getAppDati()}.`;
+    const promptTesto = `Il meteo attuale a ${locationName} è: ${meteoDesc} con ${temp}°C. Suggerisci 2 o più attività ideali, spiegando in modo approfondito e dettagliato perché sono perfette con questo tempo. Basati ESCLUSIVAMENTE sull'app: ${getAppDati()}.`;
     
     const payload = { contents: [{ parts: [{ text: promptTesto }] }] };
     const risposta = await fetchGeminiWithRetry(payload, false);
@@ -2505,7 +2505,7 @@ async function chiediSommelierAI(nome, loc, cucina) {
   msgBox.scrollTop = msgBox.scrollHeight;
 
   try {
-    const promptTesto = `Consiglia 2 piatti tipici precisi di ${loc} per il ristorante "${nome}" (cucina: ${cucina}), e un vino siciliano da abbinare. Max 3 frasi.`;
+    const promptTesto = `Consiglia 2 piatti tipici precisi di ${loc} per il ristorante "${nome}" (cucina: ${cucina}), e un vino siciliano da abbinare. Scrivi una recensione estesa, descrivendo accuratamente i sapori, gli ingredienti e il motivo per cui l'abbinamento del vino è perfetto.`;
     const payload = { contents: [{ parts: [{ text: promptTesto }] }], systemInstruction: { parts: [{ text: "Sei un sommelier locale." }] } };
     const risposta = await fetchGeminiWithRetry(payload, false);
     document.getElementById(loaderId).outerHTML = `<div class="chat-bubble ai">🍷 <b>Consiglio:</b><br>${risposta.replace(/\n/g, '<br>')}</div>`;
