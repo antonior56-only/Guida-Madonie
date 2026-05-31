@@ -152,7 +152,7 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);c
 #info-panel{
   position:fixed;bottom:0;left:360px;right:0;z-index:1070;
   background:#fff;border-top:2px solid var(--gold);
-  padding:14px 20px;max-height:250px;overflow-y:auto;
+  padding:14px 20px;max-height:350px;overflow-y:auto;
   transform:translateY(100%);transition:transform .3s;
   box-shadow:0 -4px 20px rgba(0,0,0,.15);
 }
@@ -263,6 +263,29 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--cream);c
 #passaporto-modal .badge-locked { background: var(--cream); color: var(--muted); padding: 5px 10px; border-radius: 8px; border: 1px dashed var(--border); margin: 4px; display: inline-block; font-size:12px; }
 .checkin-btn { background: #27ae60; color: #fff; }
 .checkin-btn[disabled] { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
+/* ── TOGGLE AI GUIDE CSS ── */
+.ai-toggle-group {
+  display: inline-flex;
+  background: var(--cream);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.ai-toggle-btn {
+  background: transparent;
+  border: none;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--stone);
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+  border-right: 1px solid var(--border);
+}
+.ai-toggle-btn:last-child { border-right: none; }
+.ai-toggle-btn.active { background: var(--sage); color: #fff; }
 
 /* ── AI CHAT WIDGET ── */
 #chat-widget {
@@ -772,10 +795,23 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
   <div id="info-extra"></div>
   <div id="info-rating" style="display:flex;gap:5px;margin-top:6px"></div>
   <div id="info-meteo" style="margin-top:6px;font-size:12px;color:var(--muted);min-height:18px"></div>
+  
+  <div id="info-altimetria" style="margin-top:8px;font-size:12px;color:var(--forest);background:#eef5f0;padding:8px;border-radius:8px;display:none;border-left:3px solid var(--sage)"></div>
+
   <div id="info-add-route" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
     <button class="btn" id="btn-add-current-route" style="background:var(--forest)">+ Aggiungi al percorso</button>
     <div id="info-web-btn"></div>
     <a href="#" id="btn-naviga-google" target="_blank" class="btn btn-outline" style="background:#fff;border-color:var(--sky);color:var(--sky);display:none;text-decoration:none">🧭 Naviga lì</a>
+    <button class="btn checkin-btn" id="btn-checkin">📍 Fai Check-in</button>
+  </div>
+
+  <div id="info-ai-guide-container" style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border);">
+    <div style="font-size:12px; font-weight:700; color:var(--forest); margin-bottom:8px;">✨ Guida AI Interattiva</div>
+    <div class="ai-toggle-group">
+      <button class="ai-toggle-btn" id="btn-ai-testo" onclick="generaGuidaAI('testo')">📝 Leggi</button>
+      <button class="ai-toggle-btn" id="btn-ai-audio" onclick="generaGuidaAI('audio')">🎧 Ascolta</button>
+    </div>
+    <div id="info-ai-text" style="display:none; font-size:13px; margin-top:10px; padding:12px; background:#f4f8fb; border-radius:8px; border-left:3px solid var(--sage); color:var(--text); line-height:1.6;"></div>
   </div>
 </div>
 
@@ -827,7 +863,7 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
         </select>
       </div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:10px">
+    <div style="display:flex;gap:8px;margin:10px 0">
       <div class="form-row" style="flex:1;margin-bottom:0">
         <label>Fascia prezzo</label>
         <select id="rist-price" style="width:100%;padding:7px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none">
@@ -891,7 +927,7 @@ box-shadow:0 4px 14px rgba(0,0,0,.15)">
         <input type="number" id="trek-km" placeholder="Es. 8" step="0.1" min="0"/>
       </div>
     </div>
-    <div style="display:flex;gap:8px;margin-top:10px">
+    <div style="display:flex;gap:8px;margin:10px 0">
       <div class="form-row" style="flex:1;margin-bottom:0">
         <label>Durata</label>
         <input type="text" id="trek-h" placeholder="Es. 3-4h"/>
@@ -1090,6 +1126,7 @@ function showToast(msg){
 function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open')}
 function closeModal(id){document.getElementById(id).classList.remove('open')}
 function closeInfo(){
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
   document.getElementById('info-panel').classList.remove('open');
   document.getElementById('chat-widget').style.display='flex';
 }
@@ -1390,6 +1427,15 @@ function showInfoByName(name, type) {
   if(type === 'alloggio') p = ALLOGGI_CONSIGLIATI.find(x => x.name === name);
   if(!p) return;
 
+  // Reset e pulizia del nuovo pannello AI Guide Toggle
+  const aiTextDiv = document.getElementById('info-ai-text');
+  aiTextDiv.style.display = 'none';
+  aiTextDiv.innerHTML = '';
+  aiTextDiv.dataset.nome = name; // salvo il nome per ricaricarlo facilmente
+  document.getElementById('btn-ai-testo').classList.remove('active');
+  document.getElementById('btn-ai-audio').classList.remove('active');
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+
   document.getElementById('info-name').textContent = p.name;
   document.getElementById('info-desc').textContent = p.desc || '';
   
@@ -1457,15 +1503,8 @@ function showInfoByName(name, type) {
   const addRouteBtn = document.getElementById('btn-add-current-route');
   addRouteBtn.onclick = () => addPopupToRouteByName(p.name, type);
 
-  const infoAddRoute = document.getElementById('info-add-route');
-  let checkinBtn = document.getElementById('btn-checkin');
-  if(!checkinBtn) {
-    checkinBtn = document.createElement('button');
-    checkinBtn.id = 'btn-checkin';
-    checkinBtn.className = 'btn checkin-btn';
-    infoAddRoute.appendChild(checkinBtn);
-  }
-  
+  // Gestione pulsante Check-in integrato nell'HTML pre-esistente
+  const checkinBtn = document.getElementById('btn-checkin');
   if (CHECKINS.includes(p.name)) {
     checkinBtn.innerHTML = '✅ Visitato';
     checkinBtn.disabled = true;
@@ -1476,30 +1515,8 @@ function showInfoByName(name, type) {
     checkinBtn.onclick = () => eseguiCheckIn(p.name, p.coords);
   }
 
-  let audioBtn = document.getElementById('btn-audioguida');
-  if(!audioBtn) {
-    audioBtn = document.createElement('button');
-    audioBtn.id = 'btn-audioguida';
-    audioBtn.className = 'btn btn-outline';
-    infoAddRoute.appendChild(audioBtn);
-  }
-  audioBtn.style.display = 'inline-block';
-  audioBtn.innerHTML = '🎧 Ascolta (AI)';
-  audioBtn.onclick = () => generaEAscolta(p.name, type, p.desc);
-  
-  const closeBtn = document.getElementById('info-close');
-  closeBtn.onclick = () => {
-     if(window.speechSynthesis) window.speechSynthesis.cancel();
-     closeInfo();
-  };
-
-  let altimetriaEl = document.getElementById('info-altimetria');
-  if(!altimetriaEl) {
-    altimetriaEl = document.createElement('div');
-    altimetriaEl.id = 'info-altimetria';
-    altimetriaEl.style.cssText = "margin-top:8px;font-size:12px;color:var(--forest);background:#eef5f0;padding:8px;border-radius:8px;display:none;border-left:3px solid var(--sage)";
-    document.getElementById('info-extra').parentNode.insertBefore(altimetriaEl, document.getElementById('info-add-route'));
-  }
+  // Gestione Altimetria integrata
+  const altimetriaEl = document.getElementById('info-altimetria');
   if(type === 'trekking' && p.coords) {
      altimetriaEl.style.display = 'block';
      fetchElevationProfile(p.coords, altimetriaEl);
@@ -2344,18 +2361,56 @@ function leggiAdAltaVoce(testo) {
   window.speechSynthesis.speak(u);
 }
 
-async function generaEAscolta(nome, tipo, desc) {
-  const btn = document.getElementById('btn-audioguida');
-  if(btn) { btn.innerHTML = "⏳ Genero..."; btn.disabled = true; }
+/* ── FUNZIONE TOGGLE AI ── */
+async function generaGuidaAI(mode) {
+  const textDiv = document.getElementById('info-ai-text');
+  const nome = textDiv.dataset.nome;
+  const btnTesto = document.getElementById('btn-ai-testo');
+  const btnAudio = document.getElementById('btn-ai-audio');
+
+  btnTesto.classList.remove('active');
+  btnAudio.classList.remove('active');
+
+  if (mode === 'testo') {
+    btnTesto.classList.add('active');
+    if(window.speechSynthesis) window.speechSynthesis.cancel(); // Ferma l'audio se in riproduzione
+  } else {
+    btnAudio.classList.add('active');
+  }
+
+  // Se il testo è già stato generato per questo luogo, evito di richiamare le API
+  if (textDiv.innerHTML && !textDiv.innerHTML.includes('Generazione in corso') && !textDiv.innerHTML.includes('Errore')) {
+     textDiv.style.display = 'block';
+     if (mode === 'audio') leggiAdAltaVoce(textDiv.innerText);
+     return;
+  }
+
+  // Richiesta API
+  btnTesto.disabled = true;
+  btnAudio.disabled = true;
+  if (mode === 'testo') btnTesto.innerHTML = "⏳ Genero...";
+  else btnAudio.innerHTML = "⏳ Genero...";
+
+  textDiv.style.display = 'block';
+  textDiv.innerHTML = '<span class="spinner" style="width:12px;height:12px;border-top-color:var(--sage)"></span> Generazione in corso...';
+
   try {
-     const prompt = `Sei una guida turistica delle Madonie. Scrivi un racconto evocativo, molto dettagliato e appassionante sul luogo "${nome}". Includi curiosità e descrizioni dell'atmosfera. Nessuna formattazione speciale.`;
+     const prompt = `Sei una guida turistica delle Madonie. Scrivi un racconto evocativo, molto dettagliato e appassionante sul luogo "${nome}". Includi curiosità e descrizioni dell'atmosfera. Nessuna formattazione speciale, solo testo pulito.`;
      const text = await fetchGeminiWithRetry({ contents: [{ parts: [{ text: prompt }] }] }, false);
-     if(btn) { btn.innerHTML = "🔊 Riproduzione..."; btn.disabled = false; }
-     leggiAdAltaVoce(text.replace(/\*/g, ''));
-     showToast("Audioguida avviata");
+
+     const cleanText = text.replace(/\*/g, '');
+     textDiv.innerHTML = cleanText.replace(/\n/g, '<br>');
+
+     if (mode === 'audio') {
+         leggiAdAltaVoce(cleanText);
+     }
   } catch (e) {
-     if(btn) { btn.innerHTML = "🎧 Ascolta (AI)"; btn.disabled = false; }
-     showToast("Errore di rete per l'audioguida");
+     textDiv.innerHTML = "<span style='color:var(--rust)'>Errore di rete. Riprova più tardi.</span>";
+  } finally {
+     btnTesto.disabled = false;
+     btnAudio.disabled = false;
+     btnTesto.innerHTML = "📝 Leggi";
+     btnAudio.innerHTML = "🎧 Ascolta";
   }
 }
 
